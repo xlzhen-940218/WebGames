@@ -1,10 +1,10 @@
 // 静态游戏数据
 const gameData = [
     {
-        封面: 'wuziqi.png',
+        封面: 'images/wuziqi.png',
         标题: '五子棋',
         介绍: '童年回忆五子棋',
-        链接: 'wuziqi.html',
+        链接: 'games/wuziqi.html',
         收录时间: '2025-11-20'
     }
 ];
