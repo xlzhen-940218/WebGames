@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏首页</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>精选游戏</h1>
+    </header>
+
+    <div class="controls-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="搜索游戏标题或介绍...">
+        </div>
+
+        <div class="view-toggle">
+            <button id="listViewBtn" class="active" title="列表视图">
+                <i class="fas fa-list"></i>
+            </button>
+            <button id="gridViewBtn" title="宫格视图">
+                <i class="fas fa-th-large"></i>
+            </button>
+        </div>
+    </div>
+
+    <main id="gameListContainer" class="list-view">
+        </main>
+
+    <p id="noResults" style="text-align: center; padding: 20px; display: none;">未找到匹配的游戏。</p>
+
+    <script src="script.js"></script>
+</body>
+</html>
