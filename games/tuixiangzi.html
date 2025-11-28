@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>精美推箱子 - 网页版</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --board-bg: #e0e5ec;
+            --wall-color: #5e6c7c;
+            --floor-color: #ffffff;
+            --target-color: #ff7675;
+            --box-color: #fdcb6e;
+            --box-on-target: #00b894;
+            --player-color: #0984e3;
+            --text-color: #2d3436;
+        }
+
+        * { box-sizing: border-box; touch-action: manipulation; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+        .status { font-size: 0.9rem; margin-top: 5px; color: #636e72; }
+
+        /* 游戏区域 */
+        #game-container {
+            position: relative;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        #game-board {
+            display: grid;
+            background-color: var(--board-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.1s ease;
+        }
+
+        /* 响应式格子大小 */
+        @media (max-width: 500px) {
+            .cell { width: 9vmin; height: 9vmin; font-size: 5vmin; }
+        }
+
+        /* 元素样式 */
+        .wall { background-color: var(--wall-color); box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .floor { background-color: var(--floor-color); }
+        .target { position: relative; }
+        .target::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: var(--target-color);
+            border-radius: 50%;
+        }
+        
+        .box {
+            background-color: var(--box-color);
+            border-radius: 4px;
+            border: 2px solid #dfa536;
+            width: 80%;
+            height: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .box.ok {
+            background-color: var(--box-on-target);
+            border-color: #008f72;
+        }
+
+        .player {
+            width: 80%;
+            height: 80%;
+            background-color: var(--player-color);
+            border-radius: 50%;
+            border: 2px solid #065fa3;
+            z-index: 20;
+            position: relative;
+        }
+        /* 给玩家加个简单的笑脸 */
+        .player::before, .player::after {
+            content: ''; position: absolute; top: 30%; width: 15%; height: 15%; background: white; border-radius: 50%;
+        }
+        .player::before { left: 25%; } .player::after { right: 25%; }
+
+        /* 控制区域 */
+        #controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-areas: 
+                ". up ."
+                "left down right";
+            gap: 10px;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s, background 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active { transform: scale(0.9); background: #f1f1f1; }
+        
+        #btn-up { grid-area: up; }
+        #btn-down { grid-area: down; }
+        #btn-left { grid-area: left; }
+        #btn-right { grid-area: right; }
+
+        .action-btns {
+            margin-top: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .text-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 胜利弹窗 */
+        #win-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #win-modal.show { visibility: visible; opacity: 1; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); } to { transform: scale(1); } }
+        .modal-content h2 { color: var(--box-on-target); margin-top: 0; }
+        .next-btn {
+            background: var(--player-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>推箱子 SOKOBAN</h1>
+        <div class="status">第 <span id="level-num">1</span> 关 | 步数: <span id="step-count">0</span></div>
+    </header>
+
+    <div id="game-container">
+        <div id="game-board"></div>
+    </div>
+
+    <div id="controls">
+        <button class="btn" id="btn-up">▲</button>
+        <button class="btn" id="btn-left">◀</button>
+        <button class="btn" id="btn-down">▼</button>
+        <button class="btn" id="btn-right">▶</button>
+    </div>
+
+    <div class="action-btns">
+        <button class="text-btn" onclick="game.resetLevel()">↺ 重置本关</button>
+        </div>
+
+    <div id="win-modal">
+        <div class="modal-content">
+            <h2>🎉 恭喜过关!</h2>
+            <p>你完成了本关挑战。</p>
+            <button class="next-btn" onclick="game.nextLevel()">下一关</button>
+        </div>
+    </div>
+
+    <script>
+        
+        const levels = [
+            // === 第1-5关：新手入门 (教学关) ===
+            // 第1关：初次见面 (直线推)
+            [
+                "#####",
+                "#@  #",
+                "# $ #",
+                "#  !#",
+                "#####"
+            ],
+            // 第2关：简单转弯 (学会不要推到死角)
+            [
+                "  #####",
+                "###   #",
+                "# ! $ #",
+                "#  @  #",
+                "#######"
+            ],
+            // 第3关：双箱子 (简单的顺序判断)
+            [
+                "######",
+                "#    #",
+                "# $! #",
+                "# @$!#",
+                "#    #",
+                "######"
+            ],
+            // 第4关：分离目标 (学会分头行动)
+            [
+                "#######",
+                "#     #",
+                "#  $  #",
+                "##!@!##",
+                "#  $  #",
+                "#     #",
+                "#######"
+            ],
+            // 第5关：T字路口 (空间利用)
+            [
+                "  #### ",
+                "###  # ",
+                "# !@$# ",
+                "# $   #",
+                "# !   #",
+                "#######"
+            ],
+
+            // === 第6-10关：初级挑战 (开始需要思考) ===
+            // 第6关：小仓库 (经典的3箱子布局)
+            [
+                "  ####  ",
+                "###  ###",
+                "#      #",
+                "# !$$! #",
+                "##  @###",
+                " # $!#  ",
+                "  ####  "
+            ],
+            // 第7关：走廊 (狭窄通道的处理)
+            [
+                "######  ",
+                "# !  ###",
+                "# $  @ #",
+                "# $ ####",
+                "###!#   ",
+                "  ###   "
+            ],
+            // 第8关：回旋镖 (需要绕路)
+            [
+                "#######",
+                "#  !  #",
+                "# $#$ #",
+                "# !@! #",
+                "# $#$ #",
+                "#  !  #",
+                "#######"
+            ],
+            // 第9关：四方阵 (容易把自己堵死)
+            [
+                "#########",
+                "#   !   #",
+                "# $ # $ #",
+                "## ### ##",
+                "#   @   #",
+                "## ###  #",
+                "#   !   #",
+                "#########"
+            ],
+            // 第10关：经典微缩 (看似简单，步步惊心)
+            [
+                "  ##### ",
+                "###   # ",
+                "# ! $ # ",
+                "#  #$ # ",
+                "### ! # ",
+                "  # @ # ",
+                "  ##### "
+            ],
+
+            // === 第11-15关：中级挑战 (逻辑进阶) ===
+            // 第11关：U型陷阱
+            [
+                "  #######",
+                "  #  !! #",
+                "### $#$ #",
+                "#  $@$  #",
+                "#  !#!  #",
+                "#       #",
+                "#########"
+            ],
+            // 第12关：错位对齐
+            [
+                "#######",
+                "#     #",
+                "# $!$ #",
+                "##$@$##",
+                "# ! ! #",
+                "#  !  #",
+                "#######"
+            ],
+            // 第13关：不要进房间 (门前清理)
+            [
+                "#######",
+                "#  !  #",
+                "# $#$ #",
+                "# !$! #",
+                "## @ ##",
+                " #   # ",
+                " ##### "
+            ],
+            // 第14关：H型结构
+            [
+                " ####### ",
+                " #  !  # ",
+                "## $#$ ##",
+                "#  !@!  #",
+                "## $#$ ##",
+                " #  !  # ",
+                " ####### "
+            ],
+            // 第15关：著名的 Microban 改版
+            [
+                "########",
+                "#      #",
+                "# !  ! #",
+                "#  $$  #",
+                "## @  ##",
+                " # $$ # ",
+                " #!  !# ",
+                " ###### "
+            ],
+
+            // === 第16-20关：高级挑战 (烧脑时刻) ===
+            // 第16关：三重门
+            [
+                "   #####",
+                "####   #",
+                "#   $@ #",
+                "#   $ ##",
+                "##$##  #",
+                "# ! !  #",
+                "#  !   #",
+                "####### "
+            ],
+            // 第17关：螺旋迷宫
+            [
+                "########",
+                "#  ! ! #",
+                "#  $ $  #",
+                "###   ###",
+                "#  $ $  #",
+                "# @! !  #",
+                "########"
+            ],
+            // 第18关：拥挤的房间 (稍微动错一步就死)
+            [
+                "  ######",
+                "###    #",
+                "#   $# #",
+                "# $  $ #",
+                "## !# @#",
+                " # !!###",
+                "  ####  "
+            ],
+            // 第19关：对称的谎言 (解法不对称)
+            [
+                "#########",
+                "#!  !  !#",
+                "# $ $ $ #",
+                "# # @ # #",
+                "# $ $ $ #",
+                "#!  !  !#",
+                "#########"
+            ],
+            // 第20关：最终试炼 (综合能力)
+            [
+                "  ######  ",
+                "  #!   #  ",
+                "### #$ ## ",
+                "#   $  !# ",
+                "# ! #$! # ",
+                "##  @  ## ",
+                " # $#$ #  ",
+                " #  !  #  ",
+                " #######  "
+            ]
+        ];
+
+        class Sokoban {
+            constructor() {
+                this.currentLevel = 19;
+                this.steps = 0;
+                this.map = []; // 当前地图状态
+                this.playerPos = {x: 0, y: 0};
+                this.boardEl = document.getElementById('game-board');
+                this.stepEl = document.getElementById('step-count');
+                this.levelEl = document.getElementById('level-num');
+                this.modal = document.getElementById('win-modal');
+                
+                this.init();
+            }
+
+            init() {
+                this.loadLevel(this.currentLevel);
+                this.setupInputs();
+            }
+
+            // 解析关卡并渲染
+            loadLevel(levelIndex) {
+                if (levelIndex >= levels.length) {
+                    alert("恭喜！你通关了所有关卡！");
+                    this.currentLevel = 0;
+                }
+                
+                // 深拷贝地图数据，防止修改原始数据
+                const rawMap = levels[this.currentLevel];
+                this.map = rawMap.map(row => row.split(''));
+                
+                // 找出最长的一行，用于设置Grid列数
+                let maxCol = 0;
+                this.map.forEach(row => maxCol = Math.max(maxCol, row.length));
+
+                // 补齐短行（用空格填充），避免数组越界风险
+                for(let y=0; y<this.map.length; y++) {
+                    while(this.map[y].length < maxCol) {
+                        this.map[y].push(' ');
+                    }
+                    // 查找玩家初始位置
+                    for(let x=0; x<maxCol; x++) {
+                        if (this.map[y][x] === '@' || this.map[y][x] === '+') {
+                            this.playerPos = {x, y};
+                        }
+                    }
+                }
+
+                this.steps = 0;
+                this.updateUI();
+                this.render();
+                this.modal.classList.remove('show');
+            }
+
+            // 渲染网格
+            render() {
+                this.boardEl.innerHTML = '';
+                const rows = this.map.length;
+                const cols = this.map[0].length;
+
+                // 设置CSS Grid
+                this.boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                this.boardEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const cellType = this.map[y][x];
+                        const cellDiv = document.createElement('div');
+                        cellDiv.className = 'cell';
+                        
+                        // 基础图层
+                        const floorDiv = document.createElement('div');
+                        floorDiv.className = 'floor'; 
+                        
+                        // 根据字符判定类型
+                        if (cellType === '#') {
+                            cellDiv.classList.add('wall');
+                        } else {
+                            cellDiv.classList.add('floor'); // 地板背景
+                            
+                            if (cellType === '!' || cellType === '*' || cellType === '+') {
+                                cellDiv.classList.add('target'); // 目标点标记
+                            }
+
+                            if (cellType === '$') {
+                                const box = document.createElement('div');
+                                box.className = 'box';
+                                cellDiv.appendChild(box);
+                            } else if (cellType === '*') {
+                                const box = document.createElement('div');
+                                box.className = 'box ok';
+                                cellDiv.appendChild(box);
+                            } else if (cellType === '@' || cellType === '+') {
+                                const player = document.createElement('div');
+                                player.className = 'player';
+                                cellDiv.appendChild(player);
+                            }
+                        }
+                        this.boardEl.appendChild(cellDiv);
+                    }
+                }
+            }
+
+            // 移动逻辑
+            move(dx, dy) {
+                const x = this.playerPos.x;
+                const y = this.playerPos.y;
+                const newX = x + dx;
+                const newY = y + dy;
+
+                // 边界检查（理论上墙壁包裹不会越界，但为了安全）
+                if (this.isOutOfBounds(newX, newY)) return;
+
+                const targetCell = this.map[newY][newX];
+
+                // 1. 如果前方是墙，不能移动
+                if (targetCell === '#') return;
+
+                // 2. 如果前方是箱子 ($ 或 *)
+                if (targetCell === '$' || targetCell === '*') {
+                    const boxNewX = newX + dx;
+                    const boxNewY = newY + dy;
+
+                    // 检查箱子后方是否有障碍
+                    if (this.isOutOfBounds(boxNewX, boxNewY)) return;
+                    const boxTargetCell = this.map[boxNewY][boxNewX];
+
+                    // 箱子后面如果是墙或另一个箱子，推不动
+                    if (boxTargetCell === '#' || boxTargetCell === '$' || boxTargetCell === '*') {
+                        return;
+                    }
+
+                    // 移动箱子
+                    // 更新箱子新位置状态
+                    if (boxTargetCell === '!') this.map[boxNewY][boxNewX] = '*';
+                    else this.map[boxNewY][boxNewX] = '$';
+
+                    // 更新箱子原位置（即人将要去的位置）状态（暂时清除箱子，稍后人会过去）
+                    if (targetCell === '*') this.map[newY][newX] = '!'; // 箱子原来在目标点
+                    else this.map[newY][newX] = ' '; // 箱子原来在普通地
+                }
+
+                // 3. 移动玩家
+                // 更新玩家旧位置
+                const currentCell = this.map[y][x];
+                if (currentCell === '+') this.map[y][x] = '!'; // 离开目标点
+                else this.map[y][x] = ' '; // 离开普通地
+
+                // 更新玩家新位置
+                // 注意：这里需要重新获取newX, newY的内容，因为如果是推箱子，上面已经修改过该位置的状态了
+                const nextSpot = this.map[newY][newX]; 
+                if (nextSpot === '!' || nextSpot === '*') { 
+                    // 这里有个逻辑细节：如果推箱子，箱子已经移走了，这里只可能是'!'或者' '。
+                    // 但如果前方本来就是空的目标点 '!'
+                   this.map[newY][newX] = '+';
+                } else {
+                   this.map[newY][newX] = '@';
+                }
+
+                this.playerPos = {x: newX, y: newY};
+                this.steps++;
+                this.updateUI();
+                this.render();
+                this.checkWin();
+            }
+
+            isOutOfBounds(x, y) {
+                return y < 0 || y >= this.map.length || x < 0 || x >= this.map[0].length;
+            }
+
+            checkWin() {
+                // 检查是否所有箱子都在目标点
+                // 只要地图里还有普通箱子 '$'，就没赢
+                // 如果全是到位箱子 '*'，则胜利
+                let hasUnfinishedBox = false;
+                for(let row of this.map) {
+                    if (row.includes('$')) {
+                        hasUnfinishedBox = true;
+                        break;
+                    }
+                }
+
+                if (!hasUnfinishedBox) {
+                    setTimeout(() => {
+                        this.modal.classList.add('show');
+                    }, 200);
+                }
+            }
+
+            nextLevel() {
+                this.currentLevel++;
+                this.loadLevel(this.currentLevel);
+            }
+
+            resetLevel() {
+                if(confirm("确定要重置本关吗？")) {
+                    this.loadLevel(this.currentLevel);
+                }
+            }
+
+            updateUI() {
+                this.stepEl.innerText = this.steps;
+                this.levelEl.innerText = this.currentLevel + 1;
+            }
+
+            setupInputs() {
+                // 键盘监听
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowUp': case 'w': this.move(0, -1); break;
+                        case 'ArrowDown': case 's': this.move(0, 1); break;
+                        case 'ArrowLeft': case 'a': this.move(-1, 0); break;
+                        case 'ArrowRight': case 'd': this.move(1, 0); break;
+                    }
+                });
+
+                // 触摸按钮监听
+                const bindBtn = (id, dx, dy) => {
+                    const btn = document.getElementById(id);
+                    // 阻止默认行为（比如双击缩放）
+                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); this.move(dx, dy); });
+                    btn.addEventListener('click', () => this.move(dx, dy));
+                };
+
+                bindBtn('btn-up', 0, -1);
+                bindBtn('btn-down', 0, 1);
+                bindBtn('btn-left', -1, 0);
+                bindBtn('btn-right', 1, 0);
+            }
+        }
+
+        // 启动游戏
+        const game = new Sokoban();
+
+    </script>
+</body>
+</html>

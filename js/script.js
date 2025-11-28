@@ -5,7 +5,14 @@ const gameData = [
         标题: '五子棋',
         介绍: '童年回忆五子棋',
         链接: 'games/wuziqi.html',
-        收录时间: '2025-11-20'
+        收录时间: '2025-11-28'
+    },
+    {
+        封面: 'images/tuixiangzi.png',
+        标题: '推箱子',
+        介绍: '童年回忆推箱子',
+        链接: 'games/tuixiangzi.html',
+        收录时间: '2025-11-28'
     }
 ];
 
