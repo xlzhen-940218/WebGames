@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>五子棋 - 全平台适配版</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --primary-color: #4a90e2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* 垂直居中 */
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+        }
+
+        h1 {
+            color: #333;
+            margin: 0 0 15px 0;
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+
+        /* 顶部控制栏布局优化 */
+        .top-bar {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mode-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .indicator.black { background: #000; }
+        .indicator.white { background: #fff; }
+
+        /* 棋盘容器：自适应宽度 */
+        #game-container {
+            position: relative;
+            padding: 10px; /* 移动端边框稍微变窄 */
+            background: #dcb35c;
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 600px; /* 电脑端最大宽度 */
+            box-sizing: border-box; /* 包含padding */
+            transition: filter 0.3s;
+            /* 关键：防止移动端触摸时滚动页面 */
+            touch-action: none; 
+        }
+
+        #game-container.thinking {
+            filter: brightness(0.9);
+            cursor: not-allowed;
+        }
+
+        canvas {
+            display: block;
+            width: 100%; /* 让 Canvas 撑满容器 */
+            height: auto;
+            border-radius: 2px;
+            background-color: #eabb76;
+            cursor: crosshair;
+        }
+
+        /* 底部按钮栏 */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            justify-content: center;
+        }
+
+        button {
+            flex: 1; /* 按钮平分宽度 */
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 0; /* 增加点击区域 */
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.3);
+            active: transform: scale(0.98);
+        }
+
+        button.secondary {
+            background: #95a5a6;
+            box-shadow: 0 4px 6px rgba(149, 165, 166, 0.3);
+        }
+
+        /* 弹窗适配 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>五子棋</h1>
+
+    <div class="top-bar">
+        <select id="game-mode" class="mode-select" onchange="changeMode()">
+            <option value="pve">人机对战</option>
+            <option value="pvp">双人对战</option>
+        </select>
+
+        <div class="status-bar">
+            <span id="turn-indicator" class="indicator black"></span>
+            <span id="turn-text">黑方 (玩家)</span>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="board"></canvas>
+    </div>
+
+    <div class="controls">
+        <button class="secondary" onclick="undoMove()">悔棋</button>
+        <button onclick="resetGame()">重新开始</button>
+    </div>
+
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="win-msg" style="margin-top:0;">黑方获胜!</h2>
+            <button onclick="resetGame(); closeModal()" style="width:100%">再来一局</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('game-container');
+        
+        // 游戏常量
+        const gridSize = 15;
+        // 注意：cellSize 现在是动态计算的，不再是固定值
+        let cellSize = 0;
+        let padding = 0;
+
+        // 游戏状态
+        let boardState = []; 
+        let currentPlayer = 1; 
+        let isGameOver = false;
+        let gameMode = 'pve'; 
+        let isAiThinking = false;
+        let moveHistory = [];
+
+        // AI 评分
+        const AI_SCORES = {
+            ONE: 10, TWO: 100, THREE: 1000, FOUR: 10000, FIVE: 100000,
+            BLOCKED_ONE: 1, BLOCKED_TWO: 10, BLOCKED_THREE: 100, BLOCKED_FOUR: 1000
+        };
+
+        // --- 初始化与响应式布局 ---
+
+        function init() {
+            boardState = Array(gridSize).fill(null).map(() => Array(gridSize).fill(0));
+            currentPlayer = 1;
+            isGameOver = false;
+            isAiThinking = false;
+            moveHistory = [];
+            container.classList.remove('thinking');
+            
+            // 触发一次尺寸计算
+            resizeBoard();
+            updateUI();
+        }
+
+        // 核心：动态调整棋盘大小
+        function resizeBoard() {
+            // 获取容器当前宽度（由CSS控制，最大600px，移动端为屏幕宽度的95%左右）
+            // 我们需要减去容器的padding (20px total)
+            const containerWidth = container.clientWidth;
+            
+            // 设置 Canvas 的物理分辨率
+            // 为了解决高清屏模糊，可以乘以 devicePixelRatio，但为了逻辑简单，
+            // 我们这里让 canvas 的 width 属性等于显示的 CSS 像素宽度即可。
+            // (五子棋对抗锯齿要求不高，这样足以清晰)
+            canvas.width = containerWidth - 20; // 减去 CSS padding
+            canvas.height = canvas.width;
+
+            // 动态计算格子大小
+            const totalWidth = canvas.width;
+            // 留出边缘的一点空隙，设为 padding
+            padding = totalWidth * 0.04; 
+            const usableWidth = totalWidth - (padding * 2);
+            cellSize = usableWidth / (gridSize - 1);
+
+            drawBoard();
+        }
+
+        // 监听窗口大小变化（横竖屏切换时）
+        window.addEventListener('resize', () => {
+            resizeBoard();
+        });
+
+        function changeMode() {
+            gameMode = document.getElementById('game-mode').value;
+            resetGame();
+        }
+
+        // --- 绘图逻辑 ---
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 背景
+            ctx.fillStyle = '#eabb76';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 线条
+            ctx.beginPath();
+            ctx.lineWidth = Math.max(1, cellSize / 20); // 线条宽度随屏幕缩放
+            ctx.strokeStyle = '#5e4022';
+            
+            for (let i = 0; i < gridSize; i++) {
+                const pos = padding + i * cellSize;
+                // 横线
+                ctx.moveTo(padding, pos);
+                ctx.lineTo(canvas.width - padding, pos);
+                // 竖线
+                ctx.moveTo(pos, padding);
+                ctx.lineTo(pos, canvas.height - padding);
+            }
+            ctx.stroke();
+
+            // 星位
+            const points = [{x:3,y:3}, {x:11,y:3}, {x:7,y:7}, {x:3,y:11}, {x:11,y:11}];
+            ctx.fillStyle = '#5e4022';
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(padding + p.x * cellSize, padding + p.y * cellSize, cellSize * 0.1, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // 绘制已有棋子
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (boardState[y][x] !== 0) {
+                        drawPiece(x, y, boardState[y][x]);
+                    }
+                }
+            }
+
+            // 标记最后一步
+            if (moveHistory.length > 0) {
+                const last = moveHistory[moveHistory.length - 1];
+                drawLastMoveMarker(last.x, last.y);
+            }
+        }
+
+        function drawPiece(x, y, type) {
+            const cx = padding + x * cellSize;
+            const cy = padding + y * cellSize;
+            const r = cellSize * 0.42; // 棋子半径
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+
+            const grad = ctx.createRadialGradient(cx - r/3, cy - r/3, r/10, cx, cy, r);
+            if (type === 1) { 
+                grad.addColorStop(0, '#666');
+                grad.addColorStop(1, '#000');
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            } else { 
+                grad.addColorStop(0, '#fff');
+                grad.addColorStop(1, '#dcdcdc');
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            }
+            ctx.shadowBlur = r * 0.2; // 阴影大小随棋子缩放
+            ctx.shadowOffsetX = r * 0.1;
+            ctx.shadowOffsetY = r * 0.1;
+
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+        }
+
+        function drawLastMoveMarker(x, y) {
+            const cx = padding + x * cellSize;
+            const cy = padding + y * cellSize;
+            ctx.beginPath();
+            ctx.fillStyle = 'red';
+            ctx.arc(cx, cy, cellSize * 0.08, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // --- 交互与游戏逻辑 ---
+
+        // 处理点击和触摸
+        function handleInput(e) {
+            if (isGameOver || isAiThinking) return;
+            if (gameMode === 'pve' && currentPlayer === 2) return;
+
+            // 获取点击坐标
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.type === 'touchstart') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            // 考虑 Canvas 的缩放比例 (Client与Width可能不一致)
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const realX = x * scaleX;
+            const realY = y * scaleY;
+
+            // 计算网格坐标
+            // 加上半个 cellSize 进行四舍五入
+            const gridX = Math.floor((realX - padding + cellSize / 2) / cellSize);
+            const gridY = Math.floor((realY - padding + cellSize / 2) / cellSize);
+
+            // 范围检查
+            if (gridX < 0 || gridX >= gridSize || gridY < 0 || gridY >= gridSize) return;
+            // 占用检查
+            if (boardState[gridY][gridX] !== 0) return;
+
+            executeMove(gridX, gridY);
+        }
+
+        // 绑定事件：同时支持鼠标和触摸
+        // 使用 touchstart 在移动端响应更快，但要注意阻止默认事件
+        canvas.addEventListener('click', handleInput);
+        
+        // 可选：为了更快的响应，可以加 touchstart，但要处理 preventDefault 防止触发 click
+        // 这里为了代码简洁和兼容性，click 事件在现代移动浏览器上已经很快了（因为禁用了缩放）
+
+        function executeMove(x, y) {
+            boardState[y][x] = currentPlayer;
+            moveHistory.push({x, y, player: currentPlayer});
+            drawBoard();
+
+            if (checkWin(x, y, currentPlayer)) {
+                isGameOver = true;
+                setTimeout(() => showWinModal(currentPlayer), 50);
+                return;
+            }
+
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateUI();
+
+            if (gameMode === 'pve' && currentPlayer === 2 && !isGameOver) {
+                isAiThinking = true;
+                container.classList.add('thinking');
+                setTimeout(makeAiMove, 300); // 移动端稍微加快一点节奏
+            }
+        }
+
+        function undoMove() {
+            if (isGameOver || isAiThinking || moveHistory.length === 0) return;
+
+            let steps = (gameMode === 'pve' && moveHistory.length > 1) ? 2 : 1;
+            if (gameMode === 'pve' && currentPlayer === 2) steps = 1;
+
+            for(let i=0; i<steps; i++) {
+                if (moveHistory.length === 0) break;
+                const last = moveHistory.pop();
+                boardState[last.y][last.x] = 0;
+                currentPlayer = last.player; 
+            }
+            drawBoard();
+            updateUI();
+            isGameOver = false;
+        }
+
+        // --- 胜负判定 (同前) ---
+        function checkWin(x, y, player) {
+            const directions = [[1,0], [0,1], [1,1], [1,-1]];
+            for (let [dx, dy] of directions) {
+                let count = 1;
+                let i = 1;
+                while(true) {
+                    let nx = x + dx*i, ny = y + dy*i;
+                    if(nx<0||nx>=gridSize||ny<0||ny>=gridSize || boardState[ny][nx] !== player) break;
+                    count++; i++;
+                }
+                i = 1;
+                while(true) {
+                    let nx = x - dx*i, ny = y - dy*i;
+                    if(nx<0||nx>=gridSize||ny<0||ny>=gridSize || boardState[ny][nx] !== player) break;
+                    count++; i++;
+                }
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        // --- AI 逻辑 (同前) ---
+        function makeAiMove() {
+            if (isGameOver) return;
+            let bestScore = -Infinity;
+            let bestPoints = [];
+
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (boardState[y][x] === 0) {
+                        const attack = evaluatePoint(x, y, 2); 
+                        const defense = evaluatePoint(x, y, 1);
+                        const score = attack + defense;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestPoints = [{x, y}];
+                        } else if (score === bestScore) {
+                            bestPoints.push({x, y});
+                        }
+                    }
+                }
+            }
+            if (bestPoints.length === 0) return;
+            const move = bestPoints[Math.floor(Math.random() * bestPoints.length)];
+            
+            isAiThinking = false;
+            container.classList.remove('thinking');
+            executeMove(move.x, move.y);
+        }
+
+        function evaluatePoint(x, y, player) {
+            let totalScore = 0;
+            const directions = [[1,0], [0,1], [1,1], [1,-1]];
+            for (let [dx, dy] of directions) {
+                let count = 1, blocked = 0;
+                let i = 1;
+                while(true) {
+                    let nx = x + dx*i, ny = y + dy*i;
+                    if(nx<0||nx>=gridSize||ny<0||ny>=gridSize) { blocked++; break; }
+                    if(boardState[ny][nx] === 0) break;
+                    if(boardState[ny][nx] !== player) { blocked++; break; }
+                    count++; i++;
+                }
+                i = 1;
+                while(true) {
+                    let nx = x - dx*i, ny = y - dy*i;
+                    if(nx<0||nx>=gridSize||ny<0||ny>=gridSize) { blocked++; break; }
+                    if(boardState[ny][nx] === 0) break;
+                    if(boardState[ny][nx] !== player) { blocked++; break; }
+                    count++; i++;
+                }
+                totalScore += getScore(count, blocked);
+            }
+            return totalScore;
+        }
+
+        function getScore(count, blocked) {
+            if (count >= 5) return AI_SCORES.FIVE;
+            if (blocked === 2) return 0;
+            if (count === 4) return blocked === 0 ? AI_SCORES.FOUR : AI_SCORES.BLOCKED_FOUR;
+            if (count === 3) return blocked === 0 ? AI_SCORES.THREE : AI_SCORES.BLOCKED_THREE;
+            if (count === 2) return blocked === 0 ? AI_SCORES.TWO : AI_SCORES.BLOCKED_TWO;
+            if (count === 1) return AI_SCORES.ONE;
+            return 0;
+        }
+
+        // --- UI 更新 ---
+        function updateUI() {
+            const indicator = document.getElementById('turn-indicator');
+            const text = document.getElementById('turn-text');
+            let playerText = currentPlayer === 1 ? "黑方" : "白方";
+            if (gameMode === 'pve') playerText += currentPlayer === 1 ? " (玩家)" : " (电脑)";
+            indicator.className = `indicator ${currentPlayer === 1 ? 'black' : 'white'}`;
+            text.innerText = playerText;
+        }
+
+        function showWinModal(player) {
+            const modal = document.getElementById('win-modal');
+            const msg = document.getElementById('win-msg');
+            let winner = player === 1 ? "黑方" : "白方";
+            if (gameMode === 'pve') winner = player === 1 ? "恭喜你" : "电脑";
+            msg.innerText = winner + " 获胜!";
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('win-modal').style.display = 'none'; }
+        function resetGame() { closeModal(); init(); }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>
