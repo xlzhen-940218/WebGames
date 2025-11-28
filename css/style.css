@@ -143,6 +143,10 @@ body {
 .list-view .game-time {
     font-size: 12px;
     color: #999;
+    /* 关键改动：移除或设置为零，以消除 p 标签默认的底部空白 */
+    margin-bottom: 0; 
+    /* 确保顶部也没有多余的边距，如果需要可以调整为 small value */
+    margin-top: 5px;
 }
 
 /* 宫格视图 (保持不变) */
