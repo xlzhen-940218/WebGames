@@ -13,6 +13,13 @@ const gameData = [
         介绍: '童年回忆推箱子',
         链接: 'games/tuixiangzi.html',
         收录时间: '2025-11-28'
+    },
+    {
+        封面: 'images/tanshishe.png',
+        标题: '贪吃蛇',
+        介绍: '经典贪吃蛇游戏',
+        链接: 'games/tanshishe.html',
+        收录时间: '2025-12-01'
     }
 ];
 
