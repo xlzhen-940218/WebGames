@@ -15,10 +15,10 @@ const gameData = [
         收录时间: '2025-11-28'
     },
     {
-        封面: 'images/tanshishe.png',
+        封面: 'images/tanchishe.png',
         标题: '贪吃蛇',
         介绍: '经典贪吃蛇游戏',
-        链接: 'games/tanshishe.html',
+        链接: 'games/tanchishe.html',
         收录时间: '2025-12-01'
     }
 ];
