@@ -274,6 +274,8 @@
             
             if (gameLoop) clearInterval(gameLoop);
             gameLoop = setInterval(update, currentSpeed);
+            // 启动独立的渲染循环，确保渲染与 speed（移动间隔）解耦
+            startRender();
         }
 
         function gameOver(reason) {
@@ -361,7 +363,19 @@
                 snake.pop();
             }
 
+            // draw 会被渲染循环持续调用，但在这里保留一次绘制以保证立即刷新
             draw();
+        }
+
+        // 持续渲染循环：与逻辑更新（setInterval）解耦，保证画面即时反馈
+        function loopRender() {
+            if (!isRunning) return; // 停止渲染
+            draw();
+            requestAnimationFrame(loopRender);
+        }
+
+        function startRender() {
+            requestAnimationFrame(loopRender);
         }
 
         function draw() {
@@ -412,10 +426,14 @@
         // --- 控制 ---
         function setDir(d) {
             if (!isRunning) return;
-            if (d === 'up' && dy === 0) { nextDx = 0; nextDy = -1; }
-            if (d === 'down' && dy === 0) { nextDx = 0; nextDy = 1; }
-            if (d === 'left' && dx === 0) { nextDx = -1; nextDy = 0; }
-            if (d === 'right' && dx === 0) { nextDx = 1; nextDy = 0; }
+            // 使用 nextDx/nextDy 做 180 度翻转校验，这样可以在一次移动间隔内缓存多次按键
+            if (d === 'up' && nextDy === 0) { nextDx = 0; nextDy = -1; }
+            if (d === 'down' && nextDy === 0) { nextDx = 0; nextDy = 1; }
+            if (d === 'left' && nextDx === 0) { nextDx = -1; nextDy = 0; }
+            if (d === 'right' && nextDx === 0) { nextDx = 1; nextDy = 0; }
+
+            // 立即重绘，提供更及时的视觉反馈（渲染不再依赖移动间隔）
+            draw();
         }
 
         // 键盘
