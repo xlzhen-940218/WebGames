@@ -1,25 +1,32 @@
-// 静态游戏数据
+// Static game data (English keys)
 const gameData = [
     {
-        封面: 'images/wuziqi.png',
-        标题: '五子棋',
-        介绍: '童年回忆五子棋',
-        链接: 'games/wuziqi.html',
-        收录时间: '2025-11-28'
+        cover: 'images/wuziqi.png',
+        title: '五子棋',
+        description: '经典五子棋对战，可本地与好友交手。',
+        link: 'games/wuziqi.html',
+        date: '2025-11-28'
     },
     {
-        封面: 'images/tuixiangzi.png',
-        标题: '推箱子',
-        介绍: '童年回忆推箱子',
-        链接: 'games/tuixiangzi.html',
-        收录时间: '2025-11-28'
+        cover: 'images/tuixiangzi.png',
+        title: '推箱子',
+        description: '益智推箱子关卡，锻炼逻辑与空间思维。',
+        link: 'games/tuixiangzi.html',
+        date: '2025-11-28'
     },
     {
-        封面: 'images/tanchishe.png',
-        标题: '贪吃蛇',
-        介绍: '经典贪吃蛇游戏',
-        链接: 'games/tanchishe.html',
-        收录时间: '2025-12-01'
+        cover: 'images/tanchishe.png',
+        title: '贪吃蛇',
+        description: '简单上手的经典贪吃蛇，记录你的最高分。',
+        link: 'games/tanchishe.html',
+        date: '2025-12-01'
+    },
+    {
+        cover: 'images/eluosifangkuai.png',
+        title: '俄罗斯方块',
+        description: '时间考验的俄罗斯方块，挑战手速与策略。',
+        link: 'games/eluosifangkuai.html',
+        date: '2025-12-02'
     }
 ];
 
@@ -45,19 +52,72 @@ function renderGames(games) {
 
     games.forEach(game => {
         const item = document.createElement('a');
-        item.href = game.链接;
+        item.href = game.link;
         item.classList.add('game-item');
 
-        item.innerHTML = `
-            <div class="game-cover">
-                <img src="${game.封面}" alt="${game.标题} 封面">
-            </div>
-            <div class="game-info">
-                <h2 class="game-title">${game.标题}</h2>
-                <p class="game-intro">${game.介绍}</p>
-                <p class="game-time">收录：${game.收录时间}</p>
-            </div>
-        `;
+        // create cover & info elements so we can progressively swap the image
+        const coverWrap = document.createElement('div');
+        coverWrap.classList.add('game-cover');
+
+        const img = document.createElement('img');
+        const coverPath = game.cover || '';
+        // derive small image by adding "_small" before extension in same directory,
+        // e.g. images/wuziqi.png -> images/wuziqi_small.png
+        const parts = coverPath.split('/');
+        const dirname = parts.length > 1 ? parts.slice(0, -1).join('/') : '';
+        const basename = parts[parts.length - 1] || '';
+        const dotIndex = basename.lastIndexOf('.');
+        const nameOnly = dotIndex > -1 ? basename.slice(0, dotIndex) : basename;
+        const ext = dotIndex > -1 ? basename.slice(dotIndex) : '';
+        const smallBasename = `${nameOnly}_small${ext}`;
+        const smallPath = (dirname ? dirname + '/' : '') + smallBasename;
+
+        img.alt = `${game.title} 封面`;
+
+        // Try load small first; if small exists, show it and then try replacing with large.
+        // If small missing, fallback to loading large directly.
+        const loadLarge = () => {
+            const largeLoader = new Image();
+            largeLoader.onload = function () { img.src = coverPath; };
+            largeLoader.onerror = function () { /* keep whatever src is displayed */ };
+            largeLoader.src = coverPath;
+        };
+
+        const smallLoader = new Image();
+        smallLoader.onload = function () {
+            img.src = smallPath; // use small immediately
+            // then try to load large to replace
+            loadLarge();
+        };
+        smallLoader.onerror = function () {
+            // small not available: load large directly
+            loadLarge();
+        };
+        smallLoader.src = smallPath;
+
+        coverWrap.appendChild(img);
+
+        const info = document.createElement('div');
+        info.classList.add('game-info');
+
+        const h2 = document.createElement('h2');
+        h2.classList.add('game-title');
+        h2.textContent = game.title;
+
+        const pIntro = document.createElement('p');
+        pIntro.classList.add('game-intro');
+        pIntro.textContent = game.description;
+
+        const pTime = document.createElement('p');
+        pTime.classList.add('game-time');
+        pTime.textContent = `收录：${game.date}`;
+
+        info.appendChild(h2);
+        info.appendChild(pIntro);
+        info.appendChild(pTime);
+
+        item.appendChild(coverWrap);
+        item.appendChild(info);
 
         container.appendChild(item);
     });
@@ -69,8 +129,8 @@ function handleSearch() {
     
     // 过滤数据
     const filteredGames = gameData.filter(game => {
-        const titleMatch = game.标题.toLowerCase().includes(query);
-        const introMatch = game.介绍.toLowerCase().includes(query);
+        const titleMatch = (game.title || '').toLowerCase().includes(query);
+        const introMatch = (game.description || '').toLowerCase().includes(query);
         return titleMatch || introMatch;
     });
 
