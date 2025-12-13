@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精美拼图游戏 (改进版)</title>
+    <style>
+        /* CSS 样式部分 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        #controls {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+            font-size: 1em;
+        }
+
+        #startButton {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #startButton:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        #hintButton {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #hintButton:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        #changeImageButton {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        #changeImageButton:hover {
+            background-color: #e0a800;
+            transform: translateY(-1px);
+        }
+        
+        #sizeSelect {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+
+        #game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+        }
+
+        #puzzle-board {
+            border: 5px solid #333;
+            background-color: #e0e0e0;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            width: 400px; 
+            height: 400px;
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+
+        /* 新的 CSS */
+        .puzzle-piece {
+            position: absolute;
+            background-size: 400px 400px;
+            cursor: move;
+            /* 移除所有过渡效果，使拖动更跟手 */
+            transition: none;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        /* 添加一个特殊的类，用于需要平滑过渡的场景（比如自动归位）*/
+        .puzzle-piece.animated {
+            transition: left 0.3s, top 0.3s;
+        }
+        
+        .puzzle-piece.dragging {
+            z-index: 1000; /* 拖动中的块浮在最上层 */
+            opacity: 0.9;
+            transform: scale(1.05); /* 拖动时稍微放大，增加视觉反馈 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            /* 拖动时也移除过渡效果 */
+            transition: none;
+        }
+        
+        /* 锁定在正确位置的块 */
+        .puzzle-piece.correct {
+            border: 2px solid #28a745;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.7);
+            cursor: default;
+            z-index: 5; /* 降低图层，只高于板子，但低于可移动的块 */
+            transition: none; /* 锁定时不需要移动过渡 */
+        }
+
+        #original-image-container {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ccc;
+            overflow: hidden;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+        
+        #original-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            margin: 20px;
+        }
+
+        .modal h2 {
+            color: #28a745;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            #controls {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            #controls > * {
+                width: 100%;
+                text-align: center;
+            }
+            
+            #game-container {
+                flex-direction: column;
+                gap: 20px;
+                padding: 15px;
+            }
+            
+            #puzzle-board {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .puzzle-piece {
+                background-size: 300px 300px;
+            }
+            
+            #original-image-container {
+                width: 150px;
+                height: 150px;
+                align-self: center;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 1.1em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            #puzzle-board {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .puzzle-piece {
+                background-size: 250px 250px;
+            }
+            
+            #original-image-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ 精美拼图游戏 (改进版) ✨</h1>
+
+    <div id="controls">
+        <label for="sizeSelect">难度 (N x N):</label>
+        <select id="sizeSelect">
+            <option value="2">2x2 (简单)</option>
+            <option value="3" selected>3x3 (中等)</option>
+            <option value="4">4x4 (困难)</option>
+        </select>
+        <button id="startButton">开始/重新开始</button>
+        <button id="hintButton">显示/隐藏原图</button>
+        <button id="changeImageButton">切换图片</button>
+    </div>
+
+    <div id="game-container">
+        <div id="puzzle-board">
+            <p style="text-align: center; line-height: 400px; color: #666;">点击"开始"按钮来打乱并开始游戏！</p>
+        </div>
+        
+        <div id="original-image-container">
+            <img id="original-image" src="images/z-image_00124_.png" alt="原始图片" />
+        </div>
+    </div>
+    
+    <div id="winOverlay" class="overlay">
+        <div class="modal">
+            <h2>恭喜你！🎉</h2>
+            <p>你成功完成了拼图！</p>
+            <button onclick="document.getElementById('winOverlay').style.display='none'">继续</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript 逻辑部分
+        // 本地图片列表
+        const localImages = [
+            'images/z-image_00124_.png',
+            'images/z-image_00125_.png',
+            'images/z-image_00126_.png',
+            'images/z-image_00127_.png',
+            'images/z-image_00128_.png',
+            'images/z-image_00129_.png',
+            'images/z-image_00130_.png',
+            'images/z-image_00131_.png',
+            'images/z-image_00132_.png',
+            'images/z-image_00133_.png',
+            'images/z-image_00149_.png',
+            'images/z-image_00151_.png',
+            'images/z-image_00158_.png',
+            'images/z-image_00159_.png',
+            'images/z-image_00162_.png',
+            'images/z-image_00163_.png',
+            'images/z-image_00164_.png',
+            'images/z-image_00165_.png',
+            'images/z-image_00166_.png',
+            'images/z-image_00167_.png',
+            'images/z-image_00168_.png'
+        ];
+        
+        let currentImageIndex = 0;
+        const board = document.getElementById('puzzle-board');
+        const originalImage = document.getElementById('original-image');
+        const startButton = document.getElementById('startButton');
+        const hintButton = document.getElementById('hintButton');
+        const changeImageButton = document.getElementById('changeImageButton');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const winOverlay = document.getElementById('winOverlay');
+        // 动态获取游戏板尺寸，而不是硬编码
+        function getBoardSize() {
+            // 获取计算后的样式，考虑媒体查询的影响
+            const computedStyle = window.getComputedStyle(board);
+            return parseInt(computedStyle.width);
+        }
+
+        let N = parseInt(sizeSelect.value);
+        let pieces = [];
+        let isPlaying = false;
+
+        // --- 1. 初始化和打乱 ---
+
+        function setupGame() {
+            N = parseInt(sizeSelect.value);
+            const boardSize = getBoardSize();
+            const pieceSize = boardSize / N;
+            
+            // 确保游戏板有正确的尺寸（虽然CSS已经设置了，但这里确保一下）
+            board.style.width = `${boardSize}px`;
+            board.style.height = `${boardSize}px`;
+            
+            // 随机选择一张本地图片
+            currentImageIndex = Math.floor(Math.random() * localImages.length);
+            const selectedImage = localImages[currentImageIndex];
+            originalImage.src = selectedImage;
+            
+            board.innerHTML = '';
+            pieces = [];
+            isPlaying = true;
+
+            for (let i = 0; i < N * N; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.id = `piece-${i}`;
+                piece.dataset.correctIndex = i;
+
+                const correctRow = Math.floor(i / N);
+                const correctCol = i % N;
+
+                piece.style.width = `${pieceSize}px`;
+                piece.style.height = `${pieceSize}px`;
+                piece.style.backgroundImage = `url(${selectedImage})`;
+                piece.style.backgroundPosition = `-${correctCol * pieceSize}px -${correctRow * pieceSize}px`;
+
+                pieces.push({
+                    element: piece,
+                    correctX: correctCol * pieceSize,
+                    correctY: correctRow * pieceSize,
+                    currentX: 0,
+                    currentY: 0,
+                    isLocked: false
+                });
+                
+                board.appendChild(piece);
+            }
+            
+            shufflePieces(pieces);
+            
+            pieces.forEach(p => {
+                p.element.addEventListener('mousedown', startDrag);
+                p.element.addEventListener('touchstart', startDrag);
+                p.element.style.left = `${p.currentX}px`;
+                p.element.style.top = `${p.currentY}px`;
+                p.element.classList.remove('correct'); // 重置状态
+                p.isLocked = false;
+                
+                // 检查碎片是否已经在正确位置（洗牌后可能正好在正确位置）
+                const boardSize = getBoardSize();
+                const pieceSize = boardSize / N;
+                const TOLERANCE = pieceSize * 0.3;
+                const isAlreadyCorrect = (Math.abs(p.currentX - p.correctX) < TOLERANCE) && 
+                                         (Math.abs(p.currentY - p.correctY) < TOLERANCE);
+                
+                if (isAlreadyCorrect) {
+                    p.element.classList.add('correct');
+                    p.isLocked = true;
+                    p.currentX = p.correctX;
+                    p.currentY = p.correctY;
+                    p.element.style.left = `${p.correctX}px`;
+                    p.element.style.top = `${p.correctY}px`;
+                }
+            });
+
+            // 检查是否已经完成（所有碎片都在正确位置）
+            if (checkWin()) {
+                showWinMessage();
+            }
+
+            winOverlay.style.display = 'none';
+        }
+
+        function shufflePieces(pieces) {
+            const positions = [];
+            for (let i = 0; i < pieces.length; i++) {
+                positions.push({x: pieces[i].correctX, y: pieces[i].correctY});
+            }
+            
+            // Fisher-Yates (Knuth) 洗牌算法
+            for (let i = positions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [positions[i], positions[j]] = [positions[j], positions[i]];
+            }
+
+            pieces.forEach((p, index) => {
+                p.currentX = positions[index].x;
+                p.currentY = positions[index].y;
+            });
+            
+            // 检查是否已完成，如果是，则再洗牌一次
+            if (checkWin()) {
+                shufflePieces(pieces);
+            }
+        }
+        
+        // --- 2. 拖放逻辑 ---
+
+        let activePiece = null;
+        let offset = {x: 0, y: 0};
+        
+        function startDrag(e) {
+            if (!isPlaying) return;
+            const pieceElement = e.target;
+            
+            // **改进 1.1**: 无法拖动已锁定的块
+            if (pieceElement.classList.contains('correct')) return; 
+
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+            activePiece = pieces.find(p => p.element === pieceElement);
+            
+            if (activePiece) {
+                if (e.type === 'touchstart') e.preventDefault(); 
+                
+                pieceElement.classList.add('dragging');
+
+                const rect = pieceElement.getBoundingClientRect();
+                offset.x = clientX - rect.left;
+                offset.y = clientY - rect.top;
+
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('touchend', endDrag);
+            }
+        }
+        
+        function drag(e) {
+            if (!activePiece) return;
+            
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+            if (e.type === 'touchmove') e.preventDefault(); 
+            
+            let newX = clientX - board.getBoundingClientRect().left - offset.x;
+            let newY = clientY - board.getBoundingClientRect().top - offset.y;
+
+            const boardSize = getBoardSize();
+            newX = Math.max(0, Math.min(newX, boardSize - activePiece.element.offsetWidth));
+            newY = Math.max(0, Math.min(newY, boardSize - activePiece.element.offsetHeight));
+
+            // 实时更新位置，使拖动更跟手
+            activePiece.element.style.left = `${newX}px`;
+            activePiece.element.style.top = `${newY}px`;
+            
+            // 实时更新currentX/Y，这样即使拖动过程中释放也能正确记录位置
+            activePiece.currentX = newX;
+            activePiece.currentY = newY;
+        }
+        
+        function endDrag(e) {
+            if (!activePiece) return;
+
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', endDrag);
+            
+            activePiece.element.classList.remove('dragging');
+
+            // 检查位置并更新 currentX/Y
+            checkPosition(activePiece);
+        }
+
+        // --- 3. 游戏状态检查与归位逻辑 ---
+
+        function checkPosition(piece) {
+            const finalLeft = parseFloat(piece.element.style.left);
+            const finalTop = parseFloat(piece.element.style.top);
+            const boardSize = getBoardSize();
+            const pieceSize = boardSize / N;
+            // 使用百分比容差：块大小的30%，这样不同难度下都有合适的容差
+            const TOLERANCE = pieceSize * 0.3;
+
+            const isCorrect = (Math.abs(finalLeft - piece.correctX) < TOLERANCE) && 
+                              (Math.abs(finalTop - piece.correctY) < TOLERANCE);
+
+            if (isCorrect) {
+                // 成功放置，吸附并锁定
+                // 添加动画类，使归位更平滑
+                piece.element.classList.add('animated');
+                piece.element.style.left = `${piece.correctX}px`;
+                piece.element.style.top = `${piece.correctY}px`;
+                
+                piece.element.classList.add('correct');
+                piece.isLocked = true;
+                
+                // 更新 currentX/Y 为正确位置
+                piece.currentX = piece.correctX;
+                piece.currentY = piece.correctY;
+                
+                // 动画结束后移除动画类
+                setTimeout(() => {
+                    piece.element.classList.remove('animated');
+                }, 300);
+                
+                if (checkWin()) {
+                    showWinMessage();
+                }
+            } else {
+                // **改进 2.1**: 错误自动回到原位 (currentX/Y)
+                // 添加动画类，使归位更平滑
+                piece.element.classList.add('animated');
+                piece.element.style.left = `${piece.currentX}px`;
+                piece.element.style.top = `${piece.currentY}px`;
+                
+                // 确保移除锁定状态和样式
+                piece.element.classList.remove('correct');
+                piece.isLocked = false;
+                
+                // 动画结束后移除动画类
+                setTimeout(() => {
+                    piece.element.classList.remove('animated');
+                }, 300);
+                
+                // 如果是手动归位，则不需要更新 currentX/Y，因为它本来就是归位点
+            }
+        }
+        
+        function checkWin() {
+            return pieces.every(p => p.isLocked);
+        }
+
+        function showWinMessage() {
+            isPlaying = false;
+            winOverlay.style.display = 'flex';
+        }
+        
+        // --- 4. 按钮事件处理 ---
+        
+        startButton.addEventListener('click', () => {
+             // 每次开始都加载一张新的随机本地图片
+             let newIndex;
+             do {
+                 newIndex = Math.floor(Math.random() * localImages.length);
+             } while (localImages.length > 1 && newIndex === currentImageIndex);
+             
+             currentImageIndex = newIndex;
+             const selectedImage = localImages[currentImageIndex];
+             document.getElementById('original-image').src = selectedImage;
+             
+             // 更新所有拼图块的背景图URL
+             pieces.forEach(p => {
+                 p.element.style.backgroundImage = `url(${selectedImage})`;
+             });
+             setupGame();
+        });
+
+        hintButton.addEventListener('click', () => {
+            const container = document.getElementById('original-image-container');
+            const isVisible = container.style.opacity === '1' || container.style.opacity === '';
+            
+            container.style.opacity = isVisible ? '0' : '1';
+            container.style.transition = 'opacity 0.5s';
+        });
+        
+        // 切换图片按钮事件处理
+        changeImageButton.addEventListener('click', () => {
+            if (!isPlaying) {
+                alert('请先开始游戏！');
+                return;
+            }
+            
+            // 切换到下一张图片
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * localImages.length);
+            } while (localImages.length > 1 && newIndex === currentImageIndex);
+            
+            currentImageIndex = newIndex;
+            const selectedImage = localImages[currentImageIndex];
+            
+            // 更新原始图片
+            originalImage.src = selectedImage;
+            
+            // 更新所有拼图块的背景图
+            const boardSize = getBoardSize();
+            const pieceSize = boardSize / N;
+            pieces.forEach((piece, i) => {
+                const correctRow = Math.floor(i / N);
+                const correctCol = i % N;
+                piece.element.style.backgroundImage = `url(${selectedImage})`;
+                piece.element.style.backgroundPosition = `-${correctCol * pieceSize}px -${correctRow * pieceSize}px`;
+            });
+            
+            // 显示提示消息
+            const message = document.createElement('div');
+            message.textContent = '图片已切换！';
+            message.style.position = 'fixed';
+            message.style.top = '50%';
+            message.style.left = '50%';
+            message.style.transform = 'translate(-50%, -50%)';
+            message.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            message.style.color = 'white';
+            message.style.padding = '10px 20px';
+            message.style.borderRadius = '5px';
+            message.style.zIndex = '3000';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 1500);
+        });
+        
+        document.getElementById('original-image-container').style.opacity = '1';
+        
+        board.innerHTML = '<p style="text-align: center; line-height: 400px; color: #666;">点击"开始"按钮来打乱并开始游戏！</p>';
+    </script>
+</body>
+</html>

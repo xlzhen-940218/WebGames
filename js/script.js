@@ -27,6 +27,13 @@ const gameData = [
         description: '时间考验的俄罗斯方块，挑战手速与策略。',
         link: 'games/eluosifangkuai.html',
         date: '2025-12-02'
+    },
+    {
+        cover: 'images/pintu.png',
+        title: '美少女拼图',
+        description: '美少女拼图游戏',
+        link: 'games/pintu.html',
+        date: '2025-12-13'
     }
 ];
 
