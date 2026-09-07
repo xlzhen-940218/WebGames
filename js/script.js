@@ -34,6 +34,13 @@ const gameData = [
         description: '美少女拼图游戏',
         link: 'games/pintu.html',
         date: '2025-12-13'
+    },
+    {
+        cover: 'images/ersilingba.svg',
+        title: '2048',
+        description: '合并相同数字，挑战合成 2048，支持手机滑动操作。',
+        link: 'games/ersilingba.html',
+        date: '2026-09-07'
     }
 ];
 
