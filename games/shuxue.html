@@ -103,7 +103,7 @@
                 max-height: none;
                 border-radius: 0;
                 box-shadow: none;
-                padding: calc(env(safe-area-inset-top, 8px) + 4px) 12px calc(env(safe-area-inset-bottom, 8px) + 6px);
+                padding: calc(env(safe-area-inset-top, 8px) + 4px) 10px calc(env(safe-area-inset-bottom, 8px) + 6px);
             }
         }
 
@@ -112,32 +112,35 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 2px 4px 8px;
+            padding: 2px 2px 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             flex-shrink: 0;
+            gap: 6px;
         }
 
-        /* 左上角音频开关群组 */
+        /* 左上角音频开关与音量滑轨群组 */
         .audio-controls {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            flex-shrink: 0;
         }
 
         .icon-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--text-light);
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             position: relative;
             transition: all 0.15s ease;
-            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+            padding: 0;
         }
 
         .icon-btn:active {
@@ -151,9 +154,70 @@
         }
 
         .icon-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: currentColor;
+        }
+
+        /* 音量调节滑轨卡片 */
+        .volume-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 2px 6px;
+            height: 32px;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 50px;
+            height: 5px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #fbbf24;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            border: 1.5px solid #ffffff;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #fbbf24;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            border: 1.5px solid #ffffff;
+        }
+
+        .volume-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--accent-yellow);
+            min-width: 24px;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+
+        @media (min-width: 400px) {
+            .volume-slider {
+                width: 65px;
+            }
         }
 
         /* 中部阶段指示与难度标签 */
@@ -161,22 +225,27 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
         }
 
         .badges-row {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .diff-badge {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 2px 7px;
-            border-radius: 12px;
-            letter-spacing: 0.3px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            letter-spacing: 0.2px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            white-space: nowrap;
         }
 
         .diff-badge.diff-easy {
@@ -196,13 +265,14 @@
         }
 
         .stage-badge {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 2px 7px;
-            border-radius: 12px;
-            letter-spacing: 0.3px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            letter-spacing: 0.2px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
         }
 
         .stage-badge.stage-1 {
@@ -226,26 +296,28 @@
         }
 
         .quest-counter {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--text-light);
+            white-space: nowrap;
         }
 
         /* 右上角得分与连击 */
         .score-info {
             text-align: right;
-            min-width: 68px;
+            min-width: 58px;
+            flex-shrink: 0;
         }
 
         .score-label {
-            font-size: 9px;
+            font-size: 8px;
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: bold;
         }
 
         .score-val {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 900;
             color: var(--accent-yellow);
             line-height: 1.1;
@@ -257,8 +329,8 @@
             color: #f43f5e;
             background: rgba(244, 63, 94, 0.15);
             border: 1px solid rgba(244, 63, 94, 0.35);
-            padding: 1px 5px;
-            border-radius: 8px;
+            padding: 1px 4px;
+            border-radius: 6px;
             display: inline-block;
             margin-top: 1px;
             opacity: 0;
@@ -273,10 +345,10 @@
 
         /* 倒计时思考指示条与时间显示 */
         .timer-section {
-            margin: 8px 4px 6px;
+            margin: 6px 2px 4px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             flex-shrink: 0;
         }
 
@@ -284,7 +356,7 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
         }
 
@@ -293,7 +365,7 @@
         }
 
         .timer-text {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 900;
             color: var(--accent-green);
             font-variant-numeric: tabular-nums;
@@ -313,9 +385,9 @@
 
         .progress-track {
             width: 100%;
-            height: 12px;
+            height: 10px;
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 2px;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
             position: relative;
@@ -325,7 +397,7 @@
         .progress-bar {
             height: 100%;
             width: 100%;
-            border-radius: 6px;
+            border-radius: 4px;
             background: linear-gradient(90deg, #10b981, #34d399);
             transition: width 0.08s linear, background 0.3s ease;
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
@@ -353,7 +425,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 6px 4px 2px;
+            padding: 4px 2px 2px;
             min-height: 0;
         }
 
@@ -363,22 +435,22 @@
             max-height: 310px;
             background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0f172a 100%);
             border: 4px solid #fed7aa;
-            border-radius: 22px;
+            border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px 12px;
+            padding: 14px 10px;
             position: relative;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         /* 黑板内边缘虚线卡通边框 */
         .chalk-frame {
             position: absolute;
-            inset: 8px;
+            inset: 6px;
             border: 2px dashed rgba(255, 255, 255, 0.16);
             border-radius: 14px;
             pointer-events: none;
@@ -386,11 +458,11 @@
 
         .mode-title-tag {
             position: absolute;
-            top: 12px;
+            top: 10px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 11px;
             font-weight: 700;
             color: var(--accent-blue);
             letter-spacing: 0.5px;
@@ -402,7 +474,7 @@
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             margin-top: 16px;
             z-index: 1;
             width: 100%;
@@ -412,50 +484,50 @@
             background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
             color: #1e1b4b;
             font-weight: 900;
-            font-size: clamp(24px, 6.2vw, 36px);
-            padding: 8px 12px;
-            border-radius: 16px;
-            min-width: 50px;
+            font-size: clamp(22px, 5.8vw, 34px);
+            padding: 6px 12px;
+            border-radius: 14px;
+            min-width: 48px;
             text-align: center;
-            box-shadow: 0 6px 0 #cbd5e1, 0 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 0 #cbd5e1, 0 8px 16px rgba(0,0,0,0.2);
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .math-operator {
             background: linear-gradient(135deg, #ec4899, #d946ef);
             color: #ffffff;
-            width: 42px;
-            height: 42px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 24px;
-            box-shadow: 0 5px 0 #9d174d, 0 6px 14px rgba(236, 72, 153, 0.35);
+            font-size: 22px;
+            box-shadow: 0 4px 0 #9d174d, 0 6px 14px rgba(236, 72, 153, 0.35);
         }
 
         .math-equal {
             font-weight: 900;
-            font-size: 30px;
+            font-size: 28px;
             color: #e2e8f0;
             padding: 0 2px;
         }
 
         /* 目标填充框 【 ? 】 */
         .math-slot {
-            min-width: 70px;
-            height: 54px;
+            min-width: 66px;
+            height: 50px;
             border: 3px dashed #fbbf24;
             background: rgba(251, 191, 36, 0.15);
-            border-radius: 16px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: clamp(24px, 6.2vw, 36px);
+            font-size: clamp(22px, 5.8vw, 34px);
             color: #fde047;
-            padding: 0 12px;
+            padding: 0 10px;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
@@ -465,7 +537,7 @@
             border: 3px solid #10b981;
             background: #10b981;
             color: #ffffff;
-            box-shadow: 0 6px 0 #047857, 0 0 20px rgba(16, 185, 129, 0.5);
+            box-shadow: 0 5px 0 #047857, 0 0 20px rgba(16, 185, 129, 0.5);
             animation: slotBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -473,7 +545,7 @@
             border: 3px solid #ef4444;
             background: #ef4444;
             color: #ffffff;
-            box-shadow: 0 6px 0 #b91c1c, 0 0 20px rgba(239, 68, 68, 0.6);
+            box-shadow: 0 5px 0 #b91c1c, 0 0 20px rgba(239, 68, 68, 0.6);
             animation: slotShake 0.4s ease;
         }
 
@@ -491,8 +563,8 @@
 
         /* 浮动提示文案 */
         .board-tip {
-            margin-top: 12px;
-            font-size: 13px;
+            margin-top: 10px;
+            font-size: 12px;
             color: var(--text-muted);
             font-weight: 600;
             z-index: 1;
@@ -502,7 +574,7 @@
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             margin-top: auto;
             flex-shrink: 0;
             padding-bottom: 2px;
@@ -512,52 +584,52 @@
             position: relative;
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
             border: none;
-            border-radius: 18px;
-            padding: 15px 8px;
-            min-height: 66px;
+            border-radius: 16px;
+            padding: 14px 6px;
+            min-height: 64px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: inherit;
-            font-size: clamp(24px, 6.2vw, 32px);
+            font-size: clamp(22px, 5.8vw, 30px);
             font-weight: 900;
             color: #ffffff;
             cursor: pointer;
-            box-shadow: 0 6px 0 #0369a1, 0 8px 18px rgba(2, 132, 199, 0.35);
+            box-shadow: 0 5px 0 #0369a1, 0 8px 18px rgba(2, 132, 199, 0.35);
             transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
         }
 
         .option-btn:nth-child(1) {
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
-            box-shadow: 0 6px 0 #0369a1, 0 8px 18px rgba(2, 132, 199, 0.35);
+            box-shadow: 0 5px 0 #0369a1, 0 8px 18px rgba(2, 132, 199, 0.35);
         }
         .option-btn:nth-child(2) {
             background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-            box-shadow: 0 6px 0 #c2410c, 0 8px 18px rgba(234, 88, 12, 0.35);
+            box-shadow: 0 5px 0 #c2410c, 0 8px 18px rgba(234, 88, 12, 0.35);
         }
         .option-btn:nth-child(3) {
             background: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
-            box-shadow: 0 6px 0 #6b21a8, 0 8px 18px rgba(126, 34, 206, 0.35);
+            box-shadow: 0 5px 0 #6b21a8, 0 8px 18px rgba(126, 34, 206, 0.35);
         }
         .option-btn:nth-child(4) {
             background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 6px 0 #047857, 0 8px 18px rgba(5, 150, 105, 0.35);
+            box-shadow: 0 5px 0 #047857, 0 8px 18px rgba(5, 150, 105, 0.35);
         }
 
         .option-btn:active {
-            transform: translateY(4px);
+            transform: translateY(3px);
             box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
         }
 
         .option-btn.btn-correct {
             background: linear-gradient(180deg, #22c55e 0%, #15803d 100%) !important;
-            box-shadow: 0 6px 0 #166534, 0 0 20px rgba(34, 197, 94, 0.6) !important;
+            box-shadow: 0 5px 0 #166534, 0 0 20px rgba(34, 197, 94, 0.6) !important;
             animation: slotBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .option-btn.btn-wrong {
             background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
-            box-shadow: 0 6px 0 #991b1b, 0 0 20px rgba(239, 68, 68, 0.6) !important;
+            box-shadow: 0 5px 0 #991b1b, 0 0 20px rgba(239, 68, 68, 0.6) !important;
             animation: slotShake 0.4s ease;
         }
 
@@ -578,7 +650,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px 16px;
+            padding: 16px 14px;
             text-align: center;
             opacity: 1;
             transition: opacity 0.25s ease, visibility 0.25s ease;
@@ -598,20 +670,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin: auto 0;
         }
 
         .game-logo-badge {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
             background: linear-gradient(135deg, #f59e0b, #ef4444);
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
-            font-size: 34px;
+            font-size: 32px;
             animation: logoFloat 3s infinite ease-in-out alternate;
         }
 
@@ -622,7 +694,7 @@
 
         .menu-title {
             margin: 0;
-            font-size: 26px;
+            font-size: 25px;
             font-weight: 900;
             color: #f8fafc;
             letter-spacing: 0.5px;
@@ -640,40 +712,40 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 10px;
+            border-radius: 14px;
+            padding: 8px 10px;
         }
 
         .difficulty-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--text-light);
-            padding: 0 4px;
+            padding: 0 2px;
         }
 
         .difficulty-header span:last-child {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--accent-yellow);
         }
 
         .diff-tabs {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
         }
 
         .diff-tab {
             background: rgba(255, 255, 255, 0.07);
             border: 2px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
-            padding: 8px 4px;
+            border-radius: 12px;
+            padding: 6px 3px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -681,33 +753,33 @@
             cursor: pointer;
             color: var(--text-light);
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
             font-family: inherit;
         }
 
         .diff-tab:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
         }
 
         .diff-tab.active {
             border-color: #fbbf24;
             background: rgba(251, 191, 36, 0.18);
-            box-shadow: 0 4px 0 #b45309, 0 0 14px rgba(251, 191, 36, 0.4);
+            box-shadow: 0 3px 0 #b45309, 0 0 12px rgba(251, 191, 36, 0.4);
             transform: scale(1.02);
         }
 
         .diff-tab .diff-icon {
-            font-size: 16px;
+            font-size: 15px;
         }
 
         .diff-tab .diff-name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
         }
 
         .diff-tab .diff-time {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--accent-yellow);
         }
@@ -717,18 +789,18 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 8px 10px;
+            border-radius: 12px;
+            padding: 6px 8px;
             display: flex;
             justify-content: space-around;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
         }
 
         .rule-item {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
         }
 
         .rule-item span:first-child {
@@ -744,21 +816,21 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 2px;
+            gap: 7px;
+            margin-top: 1px;
         }
 
         .mode-btn {
             width: 100%;
-            padding: 10px 14px;
-            border-radius: 14px;
+            padding: 9px 12px;
+            border-radius: 13px;
             border: none;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-family: inherit;
             font-weight: 800;
-            font-size: 15px;
+            font-size: 14px;
             color: #ffffff;
             cursor: pointer;
             transition: all 0.15s ease;
@@ -770,36 +842,36 @@
         }
 
         .mode-btn .mode-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
             background: rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 900;
         }
 
         .mode-btn.add {
             background: linear-gradient(135deg, #6366f1, #4f46e5);
-            box-shadow: 0 5px 0 #3730a3;
+            box-shadow: 0 4px 0 #3730a3;
         }
         .mode-btn.sub {
             background: linear-gradient(135deg, #ef4444, #dc2626);
-            box-shadow: 0 5px 0 #991b1b;
+            box-shadow: 0 4px 0 #991b1b;
         }
         .mode-btn.mul {
             background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 5px 0 #92400e;
+            box-shadow: 0 4px 0 #92400e;
         }
         .mode-btn.div {
             background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 5px 0 #065f46;
+            box-shadow: 0 4px 0 #065f46;
         }
         .mode-btn.mix {
             background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            box-shadow: 0 5px 0 #6b21a8;
+            box-shadow: 0 4px 0 #6b21a8;
         }
 
         .home-link {
@@ -807,10 +879,10 @@
             align-items: center;
             gap: 6px;
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 12px;
             text-decoration: none;
             font-weight: 700;
-            margin-top: 4px;
+            margin-top: 3px;
             transition: color 0.15s ease;
         }
 
@@ -824,8 +896,8 @@
             max-width: 360px;
             background: #1e1b4b;
             border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: 22px 18px;
+            border-radius: 22px;
+            padding: 20px 16px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
             display: flex;
             flex-direction: column;
@@ -840,13 +912,13 @@
         }
 
         .modal-icon {
-            font-size: 48px;
+            font-size: 46px;
             line-height: 1;
         }
 
         .modal-title {
             margin: 0;
-            font-size: 23px;
+            font-size: 22px;
             font-weight: 900;
             color: #ffffff;
         }
@@ -861,11 +933,11 @@
         .modal-stats {
             width: 100%;
             background: rgba(0, 0, 0, 0.25);
-            border-radius: 16px;
-            padding: 12px 14px;
+            border-radius: 14px;
+            padding: 10px 12px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         .stat-box {
@@ -882,7 +954,7 @@
         }
 
         .stat-num {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 900;
             color: var(--accent-yellow);
             margin-top: 2px;
@@ -892,17 +964,17 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 6px;
+            gap: 8px;
+            margin-top: 4px;
         }
 
         .primary-action-btn {
             width: 100%;
-            padding: 13px;
-            border-radius: 16px;
+            padding: 12px;
+            border-radius: 14px;
             border: none;
             background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 5px 0 #047857;
+            box-shadow: 0 4px 0 #047857;
             color: #ffffff;
             font-size: 16px;
             font-weight: 900;
@@ -912,18 +984,18 @@
         }
 
         .primary-action-btn:active {
-            transform: translateY(3px);
+            transform: translateY(2px);
             box-shadow: 0 2px 0 #047857;
         }
 
         .secondary-action-btn {
             width: 100%;
-            padding: 11px;
-            border-radius: 14px;
+            padding: 10px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.08);
             color: var(--text-light);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
@@ -959,20 +1031,23 @@
         <main class="game-app" id="gameApp">
             <!-- 顶部 HUD -->
             <header class="game-header">
-                <!-- 左上角独立 BGM 和 SFX 音频开关（默认开启，音量30%） -->
+                <!-- 左上角独立 BGM 和 SFX 音频开关，以及音量调节滑轨 (默认30%) -->
                 <div class="audio-controls" aria-label="音频控制">
                     <button id="bgmToggleBtn" class="icon-btn" title="背景音乐开关 (默认开)" type="button" aria-label="背景音乐">
-                        <!-- 音乐符号图标 -->
                         <svg viewBox="0 0 24 24">
                             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                         </svg>
                     </button>
                     <button id="sfxToggleBtn" class="icon-btn" title="点击音效开关 (默认开)" type="button" aria-label="游戏音效">
-                        <!-- 音效喇叭图标 -->
                         <svg viewBox="0 0 24 24">
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                         </svg>
                     </button>
+                    <!-- 音量调节滑轨 (默认30%) -->
+                    <div class="volume-slider-wrap" title="声音调节滑轨 (默认30%)">
+                        <input type="range" id="volumeSlider" min="0" max="100" value="30" class="volume-slider" aria-label="音量调节滑轨">
+                        <span id="volumePercent" class="volume-label">30%</span>
+                    </div>
                 </div>
 
                 <!-- 中间：关卡阶段与难度指示 -->
@@ -1062,7 +1137,7 @@
                         </div>
                     </div>
 
-                    <!-- 关卡难度递进规则：题目难度随题目阶段递增 -->
+                    <!-- 关卡题目难度平滑递进规则（75题：个位数5题 -> 两位数20题 -> 三位数50题） -->
                     <div class="rules-bar">
                         <div class="rule-item">
                             <span>第 1 - 5 题</span>
@@ -1070,11 +1145,11 @@
                         </div>
                         <div class="rule-item">
                             <span>第 6 - 25 题</span>
-                            <span>两位数 (20题)</span>
+                            <span>1~ 到 9~ (20题)</span>
                         </div>
                         <div class="rule-item">
                             <span>第 26 - 75 题</span>
-                            <span>三位数 (50题)</span>
+                            <span>1~~ 到 9~~ (50题)</span>
                         </div>
                     </div>
 
@@ -1083,22 +1158,22 @@
                         <button class="mode-btn add" type="button" data-mode="+">
                             <span class="mode-icon">+</span>
                             <span>加法大挑战</span>
-                            <span>75关进阶冲关 →</span>
+                            <span>75关平滑进阶冲关 →</span>
                         </button>
                         <button class="mode-btn sub" type="button" data-mode="-">
                             <span class="mode-icon">−</span>
                             <span>减法大冲关</span>
-                            <span>75关进阶冲关 →</span>
+                            <span>75关平滑进阶冲关 →</span>
                         </button>
                         <button class="mode-btn mul" type="button" data-mode="*">
                             <span class="mode-icon">×</span>
                             <span>乘法极速战</span>
-                            <span>75关进阶冲关 →</span>
+                            <span>75关平滑进阶冲关 →</span>
                         </button>
                         <button class="mode-btn div" type="button" data-mode="/">
                             <span class="mode-icon">÷</span>
                             <span>除法神机营</span>
-                            <span>75关进阶冲关 →</span>
+                            <span>75关平滑进阶冲关 →</span>
                         </button>
                         <button class="mode-btn mix" type="button" data-mode="mix">
                             <span class="mode-icon">🔀</span>
@@ -1189,7 +1264,7 @@
             'use strict';
 
             // ==========================================
-            // 1. Web Audio 纯前端程序化音乐与音效引擎
+            // 1. Web Audio 纯前端程序化高表现力音乐与音效引擎
             // ==========================================
             class SoundEngine {
                 constructor() {
@@ -1201,12 +1276,12 @@
                     // 用户设置：默认开启，音量30%
                     this.bgmEnabled = true;
                     this.sfxEnabled = true;
-                    this.volume = 0.3; // 30% 音量要求
+                    this.volume = 0.3; // 默认停在 30%
 
                     // BGM 序列器状态
                     this.isPlayingBgm = false;
                     this.bgmTimer = null;
-                    this.bgmStage = 1; // 1: 舒缓 (个位数 1-5题), 2: 有节奏 (两位数 6-25题), 3: 紧迫感 (三位数 26-75题)
+                    this.bgmStage = 1; // 1: 舒缓 (1-5题), 2: 有节奏 (6-25题), 3: 紧迫感 (26-75题)
                     this.bgmStep = 0;
 
                     this.loadSettings();
@@ -1217,11 +1292,21 @@
                     if (bgmPref !== null) this.bgmEnabled = (bgmPref === 'true');
                     const sfxPref = localStorage.getItem('webgame-shuxue-sfx');
                     if (sfxPref !== null) this.sfxEnabled = (sfxPref === 'true');
+                    const volPref = localStorage.getItem('webgame-shuxue-volume');
+                    if (volPref !== null) {
+                        const parsed = Number(volPref);
+                        if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+                            this.volume = parsed / 100;
+                        }
+                    } else {
+                        this.volume = 0.3; // 默认停在 30%
+                    }
                 }
 
                 saveSettings() {
                     localStorage.setItem('webgame-shuxue-bgm', this.bgmEnabled.toString());
                     localStorage.setItem('webgame-shuxue-sfx', this.sfxEnabled.toString());
+                    localStorage.setItem('webgame-shuxue-volume', Math.round(this.volume * 100).toString());
                 }
 
                 initCtx() {
@@ -1249,6 +1334,15 @@
                     return true;
                 }
 
+                // 调节主音量滑轨
+                setVolume(volRatio) {
+                    this.volume = Math.max(0, Math.min(1, volRatio));
+                    this.saveSettings();
+                    if (this.masterGain && this.ctx) {
+                        this.masterGain.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.02);
+                    }
+                }
+
                 toggleBgm() {
                     this.bgmEnabled = !this.bgmEnabled;
                     this.saveSettings();
@@ -1270,8 +1364,52 @@
                     return this.sfxEnabled;
                 }
 
-                // 播放短音符
-                playTone(freq, type = 'sine', duration = 0.15, gain = 0.2, dest = null) {
+                // 专为背景音乐设计的富有表现力的音符合成 (带完整的 ADSR 包络，音质丰满温暖)
+                playBgmNote(freq, type = 'triangle', duration = 0.22, gain = 0.55) {
+                    if (!this.initCtx() || !this.bgmEnabled) return;
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const noteGain = this.ctx.createGain();
+
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    // ADSR 曲线：快起、保音、平滑释放，保证音量充足且不突兀
+                    noteGain.gain.setValueAtTime(0.001, now);
+                    noteGain.gain.linearRampToValueAtTime(gain, now + 0.015);
+                    noteGain.gain.setValueAtTime(gain * 0.8, now + duration * 0.7);
+                    noteGain.gain.linearRampToValueAtTime(0.0001, now + duration);
+
+                    osc.connect(noteGain);
+                    noteGain.connect(this.bgmGain);
+
+                    osc.start(now);
+                    osc.stop(now + duration);
+                }
+
+                // 背景音乐底鼓与贝斯根音 (提供浑厚富有律动的低频节奏)
+                playBgmBass(freq, duration = 0.3, gain = 0.45) {
+                    if (!this.initCtx() || !this.bgmEnabled) return;
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const noteGain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    noteGain.gain.setValueAtTime(0.001, now);
+                    noteGain.gain.linearRampToValueAtTime(gain, now + 0.02);
+                    noteGain.gain.linearRampToValueAtTime(0.0001, now + duration);
+
+                    osc.connect(noteGain);
+                    noteGain.connect(this.bgmGain);
+
+                    osc.start(now);
+                    osc.stop(now + duration);
+                }
+
+                // 播放短音效
+                playTone(freq, type = 'sine', duration = 0.15, gain = 0.35, dest = null) {
                     if (!this.initCtx()) return;
                     const destination = dest || this.sfxGain;
                     const osc = this.ctx.createOscillator();
@@ -1293,20 +1431,20 @@
                 // SFX 库
                 playClick() {
                     if (!this.sfxEnabled) return;
-                    this.playTone(620, 'triangle', 0.08, 0.25);
+                    this.playTone(680, 'triangle', 0.08, 0.35);
                 }
 
                 playPop() {
                     if (!this.sfxEnabled) return;
-                    this.playTone(880, 'sine', 0.12, 0.3);
+                    this.playTone(880, 'sine', 0.12, 0.4);
                 }
 
                 playCorrect() {
                     if (!this.sfxEnabled) return;
                     // 和谐清脆的双音阶提示音 (E5 -> B5)
-                    this.playTone(659.25, 'sine', 0.18, 0.35);
+                    this.playTone(659.25, 'triangle', 0.18, 0.45);
                     setTimeout(() => {
-                        this.playTone(987.77, 'sine', 0.28, 0.4);
+                        this.playTone(987.77, 'triangle', 0.28, 0.5);
                     }, 80);
                 }
 
@@ -1320,7 +1458,7 @@
                     osc.frequency.setValueAtTime(260, this.ctx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.35);
 
-                    g.gain.setValueAtTime(0.35, this.ctx.currentTime);
+                    g.gain.setValueAtTime(0.4, this.ctx.currentTime);
                     g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.35);
 
                     osc.connect(g);
@@ -1331,7 +1469,7 @@
 
                 playTick() {
                     if (!this.sfxEnabled) return;
-                    this.playTone(1200, 'triangle', 0.04, 0.2);
+                    this.playTone(1200, 'triangle', 0.04, 0.3);
                 }
 
                 playVictory() {
@@ -1340,16 +1478,16 @@
                     const notes = [523.25, 659.25, 783.99, 1046.5];
                     notes.forEach((freq, idx) => {
                         setTimeout(() => {
-                            this.playTone(freq, 'triangle', idx === 3 ? 0.6 : 0.22, 0.35);
+                            this.playTone(freq, 'triangle', idx === 3 ? 0.6 : 0.22, 0.45);
                         }, idx * 110);
                     });
                 }
 
                 // ==========================================
-                // 动态自适应 BGM 引擎 (随题目关卡难度阶段自动变奏)
-                // 阶段1 (1-5题): 舒缓音乐 (85 BPM，轻柔大调音阶)
-                // 阶段2 (6-25题): 节奏感音乐 (120 BPM，活泼律动低音)
-                // 阶段3 (26-75题): 紧张感音乐 (155 BPM，极速切分音与心跳重低音)
+                // 动态自适应多声部 BGM 引擎
+                // 阶段1 (1-5题): 舒缓音乐 (88 BPM，清脆三角波旋律 + 温暖低音)
+                // 阶段2 (6-25题): 节奏感音乐 (120 BPM，活泼切分律动 + 步行动感低音)
+                // 阶段3 (26-75题): 紧张感音乐 (155 BPM，极速切分琶音 + 紧迫心跳重低音)
                 // ==========================================
                 startBgm(bgmStage = 1) {
                     this.bgmStage = bgmStage;
@@ -1374,47 +1512,60 @@
                     if (this.bgmTimer) clearInterval(this.bgmTimer);
                     if (!this.isPlayingBgm) return;
 
-                    let intervalMs = 176; // 85 BPM
+                    let intervalMs = 170; // 88 BPM
                     if (this.bgmStage === 2) intervalMs = 125; // 120 BPM
                     if (this.bgmStage === 3) intervalMs = 96;  // 155 BPM
 
+                    // 16 步主旋律
                     const stage1Melody = [
-                        261.63, 0, 329.63, 0, 392.00, 0, 523.25, 0,
-                        392.00, 0, 329.63, 0, 261.63, 0, 392.00, 0
+                        261.63, 0, 329.63, 392.00, 523.25, 392.00, 329.63, 0,
+                        349.23, 0, 392.00, 440.00, 392.00, 329.63, 261.63, 0
                     ];
                     const stage2Melody = [
-                        261.63, 392.00, 329.63, 392.00, 261.63, 440.00, 392.00, 329.63,
-                        293.66, 392.00, 349.23, 392.00, 261.63, 329.63, 392.00, 523.25
+                        261.63, 392.00, 329.63, 523.25, 261.63, 440.00, 392.00, 329.63,
+                        293.66, 392.00, 349.23, 440.00, 392.00, 329.63, 392.00, 523.25
                     ];
                     const stage3Melody = [
                         523.25, 392.00, 440.00, 329.63, 523.25, 392.00, 659.25, 523.25,
                         587.33, 440.00, 493.88, 349.23, 523.25, 659.25, 783.99, 1046.5
                     ];
 
+                    // 对应的根音和弦基底 (C - G - F - C)
+                    const bassRoots = [130.81, 98.00, 87.31, 130.81];
+
                     this.bgmTimer = setInterval(() => {
                         if (!this.isPlayingBgm || !this.bgmEnabled) return;
 
                         let melody = stage1Melody;
-                        let waveType = 'sine';
-                        let noteGain = 0.15;
+                        let waveType = 'triangle';
+                        let noteGain = 0.55;
 
                         if (this.bgmStage === 2) {
                             melody = stage2Melody;
                             waveType = 'triangle';
-                            noteGain = 0.2;
+                            noteGain = 0.6;
                         } else if (this.bgmStage === 3) {
                             melody = stage3Melody;
                             waveType = 'triangle';
-                            noteGain = 0.25;
-
-                            if (this.bgmStep % 4 === 0) {
-                                this.playTone(80, 'sine', 0.1, 0.4, this.bgmGain);
-                            }
+                            noteGain = 0.65;
                         }
 
-                        const freq = melody[this.bgmStep % melody.length];
+                        // 播放旋律高音声部
+                        const stepIdx = this.bgmStep % melody.length;
+                        const freq = melody[stepIdx];
                         if (freq > 0) {
-                            this.playTone(freq, waveType, intervalMs / 1000 * 0.9, noteGain, this.bgmGain);
+                            this.playBgmNote(freq, waveType, intervalMs / 1000 * 0.95, noteGain);
+                        }
+
+                        // 播放低音与律动基底 (每 4 步一次根音，阶段 3 加入急促心跳感)
+                        if (stepIdx % 4 === 0) {
+                            const bassFreq = bassRoots[Math.floor(stepIdx / 4) % bassRoots.length];
+                            this.playBgmBass(bassFreq, intervalMs / 1000 * 2.2, 0.45);
+                        }
+
+                        if (this.bgmStage === 3 && stepIdx % 2 === 0) {
+                            // 阶段 3 紧迫感心跳咚咚声
+                            this.playBgmBass(75, 0.1, 0.55);
                         }
 
                         this.bgmStep++;
@@ -1466,10 +1617,10 @@
                 }
             };
 
-            // 2) 关卡题目难度递进 (Stage): 只影响题目的运算位数与复杂度
+            // 2) 关卡题目难度递进 (Stage):
             // 阶段1 (1-5题，5题): 个位数加减乘除
-            // 阶段2 (6-25题，20题): 两位数加减乘除
-            // 阶段3 (26-75题，50题): 三位数加减乘除
+            // 阶段2 (6-25题，20题): 1~ 加减乘除 1~ 到 9~ 加减乘除 9~
+            // 阶段3 (26-75题，50题): 1~~ 加减乘除 1~~ 到 9~~ 加减乘除 9~~
             const STAGE_CONFIG = {
                 1: { name: '个位数', label: '🌱 个位数', class: 'stage-1', minQ: 1, maxQ: 5, bgmStage: 1 },
                 2: { name: '两位数', label: '⚡ 两位数', class: 'stage-2', minQ: 6, maxQ: 25, bgmStage: 2 },
@@ -1497,6 +1648,9 @@
             // DOM 节点引用
             const bgmToggleBtn = document.getElementById('bgmToggleBtn');
             const sfxToggleBtn = document.getElementById('sfxToggleBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumePercent = document.getElementById('volumePercent');
+
             const diffBadge = document.getElementById('diffBadge');
             const stageBadge = document.getElementById('stageBadge');
             const questCounter = document.getElementById('questCounter');
@@ -1543,11 +1697,20 @@
             // ==========================================
             // 3. 题目生成与智能干扰项算法
             // ==========================================
-            // 根据题号判断当前的关卡题目难度阶段（只影响位数）
             function getStageByQuestion(qIndex) {
                 if (qIndex <= 5) return 1;    // 1-5 题：个位数
-                if (qIndex <= 25) return 2;   // 6-25 题：两位数
-                return 3;                     // 26-75 题：三位数
+                if (qIndex <= 25) return 2;   // 6-25 题：两位数 (1~ 到 9~)
+                return 3;                     // 26-75 题：三位数 (1~~ 到 9~~)
+            }
+
+            // 两位数阶段的十位阶梯 (1~ 到 9~)
+            function getTensTier(qIndex) {
+                return Math.min(9, Math.floor((qIndex - 6) / 2) + 1);
+            }
+
+            // 三位数阶段的百位阶梯 (1~~ 到 9~~)
+            function getHundredsTier(qIndex) {
+                return Math.min(9, Math.floor((qIndex - 26) / 5) + 1);
             }
 
             function getRandomInt(min, max) {
@@ -1565,7 +1728,7 @@
                 return copy;
             }
 
-            // 生成一道符合当前关卡阶段的题目（个位数 / 两位数 / 三位数）
+            // 生成一道符合当前关卡阶段与平滑阶梯规则的题目
             function generateProblem(mode, qIndex) {
                 const stage = getStageByQuestion(qIndex);
                 let op = mode;
@@ -1576,81 +1739,120 @@
 
                 let a = 1, b = 1, answer = 2;
 
-                if (op === '+') {
-                    if (stage === 1) {
-                        // 阶段1：个位数相加 (1-9)
+                if (stage === 1) {
+                    // ==========================================
+                    // 阶段1 (1-5题，共5题)：个位数加减乘除 (1-9)
+                    // ==========================================
+                    if (op === '+') {
                         a = getRandomInt(1, 9);
                         b = getRandomInt(1, 9);
-                    } else if (stage === 2) {
-                        // 阶段2：两位数相加 (10-99)
-                        a = getRandomInt(10, 99);
-                        b = getRandomInt(10, 99);
-                    } else {
-                        // 阶段3：三位数相加 (100-899, 50-999)
-                        a = getRandomInt(100, 899);
-                        b = getRandomInt(50, 999);
-                    }
-                    answer = a + b;
-                } else if (op === '-') {
-                    if (stage === 1) {
-                        // 阶段1：个位数相减，保证结果 >= 0
+                        answer = a + b;
+                    } else if (op === '-') {
                         b = getRandomInt(1, 9);
                         answer = getRandomInt(0, 9);
                         a = b + answer;
-                    } else if (stage === 2) {
-                        // 阶段2：两位数相减
-                        b = getRandomInt(10, 85);
-                        answer = getRandomInt(10, 85);
-                        a = b + answer;
-                    } else {
-                        // 阶段3：三位数相减
-                        b = getRandomInt(100, 600);
-                        answer = getRandomInt(50, 500);
-                        a = b + answer;
-                    }
-                } else if (op === '*') {
-                    if (stage === 1) {
-                        // 阶段1：个位数乘法 (1-9)
+                    } else if (op === '*') {
                         a = getRandomInt(1, 9);
                         b = getRandomInt(1, 9);
-                    } else if (stage === 2) {
-                        // 阶段2：两位数乘法 (两位数乘一位数或轻度两位数)
-                        if (Math.random() < 0.7) {
-                            a = getRandomInt(11, 49);
-                            b = getRandomInt(2, 9);
-                        } else {
-                            a = getRandomInt(11, 25);
-                            b = getRandomInt(11, 15);
-                        }
-                    } else {
-                        // 阶段3：三位数乘法 (三位数乘一位数或整十数，心算可解)
-                        const candidates = [
-                            [getRandomInt(101, 280), getRandomInt(2, 8)],
-                            [getRandomInt(10, 25) * 10, getRandomInt(2, 9)],
-                            [getRandomInt(110, 320), getRandomInt(2, 5)]
-                        ];
-                        const pair = candidates[Math.floor(Math.random() * candidates.length)];
-                        a = pair[0];
-                        b = pair[1];
-                    }
-                    answer = a * b;
-                } else if (op === '/') {
-                    // 除法必须整除且除数不为 0
-                    if (stage === 1) {
-                        // 阶段1：个位数除法 (除数 1-9，商 1-9)
+                        answer = a * b;
+                    } else if (op === '/') {
                         b = getRandomInt(1, 9);
                         answer = getRandomInt(1, 9);
                         a = b * answer;
-                    } else if (stage === 2) {
-                        // 阶段2：两位数除法 (被除数是两位数)
-                        b = getRandomInt(2, 9);
-                        answer = getRandomInt(11, 45);
-                        a = b * answer;
-                    } else {
-                        // 阶段3：三位数除法 (被除数是三位数 100-999)
-                        b = getRandomInt(2, 19);
-                        answer = getRandomInt(12, Math.floor(999 / b));
-                        a = b * answer;
+                    }
+                } else if (stage === 2) {
+                    // ==========================================
+                    // 阶段2 (6-25题，共20题)：
+                    // 难度平滑递进：1~ 加减乘除 1~ 到 9~ 加减乘除 9~
+                    // ==========================================
+                    const T = getTensTier(qIndex); // 1 到 9
+
+                    if (op === '+') {
+                        // 1~ 加 1~ 到 9~ 加 9~
+                        a = T * 10 + getRandomInt(0, 9);
+                        b = T * 10 + getRandomInt(0, 9);
+                        answer = a + b;
+                    } else if (op === '-') {
+                        // 1~ 减 1~ 到 9~ 减 9~ (差值非负且不为0)
+                        const u1 = getRandomInt(1, 9);
+                        const u2 = getRandomInt(0, u1 - 1);
+                        a = T * 10 + u1;
+                        b = T * 10 + u2;
+                        answer = a - b;
+                    } else if (op === '*') {
+                        // 1~ 乘 1~ 到 9~ 乘 9~
+                        a = T * 10 + getRandomInt(0, 9);
+                        // 便于心算与尾数排除
+                        const friendlyDigits = [0, 1, 2, 5, getRandomInt(0, 9)];
+                        const u2 = friendlyDigits[Math.floor(Math.random() * friendlyDigits.length)];
+                        b = T * 10 + u2;
+                        answer = a * b;
+                    } else if (op === '/') {
+                        // 1~ 到 9~ 的整除：被除数在 [T*10, T*10 + 9] 范围
+                        const possibleDividends = [];
+                        for (let num = T * 10; num <= T * 10 + 9; num++) {
+                            const factors = [];
+                            for (let f = 2; f <= 19; f++) {
+                                if (num % f === 0 && num / f >= 2) {
+                                    factors.push(f);
+                                }
+                            }
+                            if (factors.length > 0) {
+                                possibleDividends.push({ num, factors });
+                            }
+                        }
+                        if (possibleDividends.length > 0) {
+                            const pick = possibleDividends[Math.floor(Math.random() * possibleDividends.length)];
+                            a = pick.num;
+                            b = pick.factors[Math.floor(Math.random() * pick.factors.length)];
+                            answer = a / b;
+                        } else {
+                            b = getRandomInt(2, 5);
+                            answer = getRandomInt(4, 9);
+                            a = b * answer;
+                        }
+                    }
+                } else {
+                    // ==========================================
+                    // 阶段3 (26-75题，共50题)：
+                    // 难度平滑递进：1~~ 加减乘除 1~~ 到 9~~ 加减乘除 9~~
+                    // ==========================================
+                    const H = getHundredsTier(qIndex); // 1 到 9
+
+                    if (op === '+') {
+                        // 1~~ 加 1~~ 到 9~~ 加 9~~
+                        a = H * 100 + getRandomInt(0, 99);
+                        b = H * 100 + getRandomInt(0, 99);
+                        answer = a + b;
+                    } else if (op === '-') {
+                        // 1~~ 减 1~~ 到 9~~ 减 9~~
+                        const u1 = getRandomInt(10, 99);
+                        const u2 = getRandomInt(0, u1 - 1);
+                        a = H * 100 + u1;
+                        b = H * 100 + u2;
+                        answer = a - b;
+                    } else if (op === '*') {
+                        // 1~~ 乘法 到 9~~ 乘法 (3秒内可通过尾数法速算)
+                        a = H * 100 + getRandomInt(0, 99);
+                        const multipliers = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+                        b = multipliers[Math.floor(Math.random() * multipliers.length)];
+                        answer = a * b;
+                    } else if (op === '/') {
+                        // 被除数在 H*100 到 H*100 + 99，整除
+                        const possibleDividends = [];
+                        for (let num = H * 100; num <= H * 100 + 99; num++) {
+                            if (num % 2 === 0 || num % 3 === 0 || num % 5 === 0) {
+                                possibleDividends.push(num);
+                            }
+                        }
+                        const cand = possibleDividends[Math.floor(Math.random() * possibleDividends.length)];
+                        const factors = [];
+                        for (let f = 2; f <= 25; f++) {
+                            if (cand % f === 0) factors.push(f);
+                        }
+                        b = factors.length > 0 ? factors[Math.floor(Math.random() * factors.length)] : 2;
+                        a = cand;
+                        answer = a / b;
                     }
                 }
 
@@ -1726,16 +1928,25 @@
 
             function updateHUD() {
                 const stage = getStageByQuestion(gameState.questionIndex);
-                const stageConf = STAGE_CONFIG[stage];
                 const diffConf = DIFFICULTY_CONFIG[gameState.difficulty];
 
-                // 难度徽章 (简单/普通/高危思考时间)
+                // 难度徽章 (简单10s / 普通5s / 高危3s)
                 diffBadge.className = `diff-badge ${diffConf.badgeClass}`;
                 diffBadge.textContent = diffConf.label;
 
-                // 关卡题目阶段徽章 (个位数/两位数/三位数)
-                stageBadge.className = `stage-badge ${stageConf.class}`;
-                stageBadge.textContent = stageConf.label;
+                // 关卡题目阶段徽章 (个位数 / 两位数 1~至9~ / 三位数 1~~至9~~)
+                if (stage === 1) {
+                    stageBadge.className = 'stage-badge stage-1';
+                    stageBadge.textContent = '🌱 个位数';
+                } else if (stage === 2) {
+                    const T = getTensTier(gameState.questionIndex);
+                    stageBadge.className = 'stage-badge stage-2';
+                    stageBadge.textContent = `⚡ 两位数 · ${T}~`;
+                } else {
+                    const H = getHundredsTier(gameState.questionIndex);
+                    stageBadge.className = 'stage-badge stage-3';
+                    stageBadge.textContent = `🔥 三位数 · ${H}~~`;
+                }
 
                 questCounter.textContent = `第 ${gameState.questionIndex} / ${TOTAL_QUESTIONS} 题`;
                 scoreVal.textContent = gameState.score;
@@ -1782,7 +1993,7 @@
                 gameState.timerActive = true;
                 gameState.lastTimestamp = performance.now();
 
-                // 背景音乐随关卡难度阶段演进 (个位数舒缓 -> 两位数有节奏 -> 三位数紧迫感)
+                // 背景音乐随关卡题目阶段演进 (个位数舒缓 -> 两位数有节奏 -> 三位数紧迫感)
                 const stage = getStageByQuestion(gameState.questionIndex);
                 sounds.updateBgmStage(STAGE_CONFIG[stage].bgmStage);
 
@@ -1935,8 +2146,6 @@
                 localStorage.setItem(BEST_KEY, best.toString());
 
                 const diffConf = DIFFICULTY_CONFIG[gameState.difficulty];
-                const stage = getStageByQuestion(gameState.questionIndex);
-                const stageConf = STAGE_CONFIG[stage];
 
                 if (reason === 'timeout') {
                     sounds.playWrong();
@@ -1989,6 +2198,9 @@
             }
 
             function startGame(mode) {
+                // 确保用户点击时恢复音频上下文
+                sounds.initCtx();
+
                 gameState.mode = mode;
                 gameState.questionIndex = 1;
                 gameState.score = 0;
@@ -2087,24 +2299,41 @@
             // ==========================================
             window.addEventListener('resize', resizeConfettiCanvas);
 
-            // 音频开关按钮事件
-            function updateAudioButtonUI() {
+            // 音频开关按钮与滑轨事件
+            function updateAudioUI() {
                 bgmToggleBtn.classList.toggle('muted', !sounds.bgmEnabled);
                 sfxToggleBtn.classList.toggle('muted', !sounds.sfxEnabled);
+
+                const volPercentVal = Math.round(sounds.volume * 100);
+                volumeSlider.value = volPercentVal;
+                volumePercent.textContent = `${volPercentVal}%`;
             }
 
             bgmToggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sounds.playClick();
                 sounds.toggleBgm();
-                updateAudioButtonUI();
+                updateAudioUI();
             });
 
             sfxToggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sounds.playClick();
                 sounds.toggleSfx();
-                updateAudioButtonUI();
+                updateAudioUI();
+            });
+
+            // 音量滑轨拖动事件
+            volumeSlider.addEventListener('input', (e) => {
+                const val = Number(e.target.value);
+                volumePercent.textContent = `${val}%`;
+                sounds.setVolume(val / 100);
+                // 如果拖动大于0且曾被静音，恢复图标状态
+                if (val > 0 && (!sounds.bgmEnabled || !sounds.sfxEnabled)) {
+                    if (!sounds.bgmEnabled) sounds.toggleBgm();
+                    if (!sounds.sfxEnabled) sounds.toggleSfx();
+                }
+                updateAudioUI();
             });
 
             // 难度切换按钮事件
@@ -2153,7 +2382,7 @@
                 returnToMenu();
             });
 
-            // 全局触摸激活音频上下文（解决移动端 Autoplay 策略）
+            // 全局触摸激活音频上下文（解决移动端 Autoplay 限制）
             const unlockAudio = () => {
                 sounds.initCtx();
                 window.removeEventListener('click', unlockAudio);
@@ -2164,7 +2393,7 @@
 
             // 初始化 UI
             setDifficulty('normal');
-            updateAudioButtonUI();
+            updateAudioUI();
         })();
     </script>
 </body>
