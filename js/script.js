@@ -48,6 +48,13 @@ const gameData = [
         description: '拖动挡板反弹小球，击碎全部砖块过关，关卡越深球速越快。',
         link: 'games/dazhuankuai.html',
         date: '2026-09-14'
+    },
+    {
+        cover: 'images/shuxue.svg',
+        title: '趣味数学大冒险',
+        description: '加减乘除算术冲关！从个位数到三位数，75关极速挑战，锻炼脑力与心算手速。',
+        link: 'games/shuxue.html',
+        date: '2026-09-14'
     }
 ];
 

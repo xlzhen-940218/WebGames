@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="趣味数学大冒险封面">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#db2777" />
+    </linearGradient>
+    <linearGradient id="boardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" rx="24" fill="url(#bgGrad)" />
+
+  <!-- Floating playful background shapes -->
+  <circle cx="50" cy="50" r="28" fill="#ffffff" opacity="0.08" />
+  <circle cx="360" cy="70" r="38" fill="#ffffff" opacity="0.08" />
+  <circle cx="340" cy="240" r="22" fill="#ffffff" opacity="0.08" />
+  <circle cx="70" cy="250" r="32" fill="#ffffff" opacity="0.08" />
+
+  <!-- Chalkboard / Card -->
+  <rect x="36" y="32" width="328" height="236" rx="22" fill="#fed7aa" filter="url(#shadow)" opacity="0.9" />
+  <rect x="42" y="38" width="316" height="224" rx="18" fill="url(#boardGrad)" />
+
+  <!-- Chalkboard border dashed inner frame -->
+  <rect x="50" y="46" width="300" height="208" rx="12" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6" opacity="0.5" />
+
+  <!-- Header Banner -->
+  <rect x="90" y="58" width="220" height="42" rx="12" fill="url(#goldGrad)" filter="url(#shadow)" />
+  <text x="200" y="87" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="20" fill="#78350f" text-anchor="middle" letter-spacing="1">数学算术大冒险</text>
+
+  <!-- Animated-looking Formula Cards -->
+  <!-- Card A: 7 -->
+  <g transform="translate(68, 122)">
+    <rect width="52" height="56" rx="12" fill="#38bdf8" filter="url(#shadow)" />
+    <rect x="2" y="2" width="48" height="26" rx="10" fill="#ffffff" opacity="0.25" />
+    <text x="26" y="38" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle">7</text>
+  </g>
+
+  <!-- Operator: × -->
+  <g transform="translate(132, 126)">
+    <circle cx="16" cy="24" r="18" fill="#ec4899" filter="url(#shadow)" />
+    <text x="16" y="32" font-family="'Arial Black', sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle">×</text>
+  </g>
+
+  <!-- Card B: 8 -->
+  <g transform="translate(176, 122)">
+    <rect width="52" height="56" rx="12" fill="#fb923c" filter="url(#shadow)" />
+    <rect x="2" y="2" width="48" height="26" rx="10" fill="#ffffff" opacity="0.25" />
+    <text x="26" y="38" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle">8</text>
+  </g>
+
+  <!-- Equal: = -->
+  <g transform="translate(240, 126)">
+    <text x="12" y="33" font-family="'Arial Black', sans-serif" font-weight="900" font-size="26" fill="#94a3b8" text-anchor="middle">=</text>
+  </g>
+
+  <!-- Answer Target Box: 56 with sparkle -->
+  <g transform="translate(266, 118)">
+    <rect width="66" height="64" rx="14" fill="#10b981" filter="url(#shadow)" />
+    <rect x="2" y="2" width="62" height="30" rx="12" fill="#ffffff" opacity="0.25" />
+    <text x="33" y="43" font-family="'Arial Black', sans-serif" font-weight="900" font-size="30" fill="#ffffff" text-anchor="middle">56</text>
+    <!-- Star sparkle -->
+    <path d="M52 10 L54 16 L60 18 L54 20 L52 26 L50 20 L44 18 L50 16 Z" fill="#fef08a" />
+  </g>
+
+  <!-- Bottom Badges / Symbols -->
+  <g transform="translate(76, 206)">
+    <!-- Pill 1: + Addition -->
+    <rect x="0" y="0" width="44" height="28" rx="8" fill="#6366f1" opacity="0.9" />
+    <text x="22" y="20" font-family="'Arial Black', sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">+</text>
+    <!-- Pill 2: - Subtraction -->
+    <rect x="58" y="0" width="44" height="28" rx="8" fill="#ef4444" opacity="0.9" />
+    <text x="80" y="19" font-family="'Arial Black', sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">−</text>
+    <!-- Pill 3: × Multiplication -->
+    <rect x="116" y="0" width="44" height="28" rx="8" fill="#f59e0b" opacity="0.9" />
+    <text x="138" y="20" font-family="'Arial Black', sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">×</text>
+    <!-- Pill 4: ÷ Division -->
+    <rect x="174" y="0" width="44" height="28" rx="8" fill="#14b8a6" opacity="0.9" />
+    <text x="196" y="19" font-family="'Arial Black', sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">÷</text>
+    <!-- 75 Levels Tag -->
+    <rect x="230" y="0" width="48" height="28" rx="8" fill="#8b5cf6" />
+    <text x="254" y="18" font-family="-apple-system, sans-serif" font-weight="bold" font-size="12" fill="#ffffff" text-anchor="middle">75关</text>
+  </g>
+</svg>

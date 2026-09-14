@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="趣味数学大冒险封面小图">
+  <defs>
+    <linearGradient id="bgGradS" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#db2777" />
+    </linearGradient>
+    <linearGradient id="goldGradS" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="24" fill="url(#bgGradS)" />
+  <rect x="36" y="32" width="328" height="236" rx="22" fill="#1e293b" />
+  <rect x="90" y="56" width="220" height="42" rx="12" fill="url(#goldGradS)" />
+  <text x="200" y="85" font-family="sans-serif" font-weight="900" font-size="20" fill="#78350f" text-anchor="middle">数学算术大冒险</text>
+  
+  <g transform="translate(68, 122)">
+    <rect width="52" height="56" rx="12" fill="#38bdf8" />
+    <text x="26" y="38" font-family="sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle">7</text>
+  </g>
+  <g transform="translate(132, 126)">
+    <circle cx="16" cy="24" r="18" fill="#ec4899" />
+    <text x="16" y="32" font-family="sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle">×</text>
+  </g>
+  <g transform="translate(176, 122)">
+    <rect width="52" height="56" rx="12" fill="#fb923c" />
+    <text x="26" y="38" font-family="sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle">8</text>
+  </g>
+  <text x="252" y="159" font-family="sans-serif" font-weight="900" font-size="26" fill="#94a3b8" text-anchor="middle">=</text>
+  <g transform="translate(266, 118)">
+    <rect width="66" height="64" rx="14" fill="#10b981" />
+    <text x="33" y="43" font-family="sans-serif" font-weight="900" font-size="30" fill="#ffffff" text-anchor="middle">56</text>
+  </g>
+  <g transform="translate(76, 206)">
+    <rect x="0" y="0" width="44" height="28" rx="8" fill="#6366f1" />
+    <text x="22" y="20" font-family="sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">+</text>
+    <rect x="58" y="0" width="44" height="28" rx="8" fill="#ef4444" />
+    <text x="80" y="19" font-family="sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">−</text>
+    <rect x="116" y="0" width="44" height="28" rx="8" fill="#f59e0b" />
+    <text x="138" y="20" font-family="sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">×</text>
+    <rect x="174" y="0" width="44" height="28" rx="8" fill="#14b8a6" />
+    <text x="196" y="19" font-family="sans-serif" font-size="18" fill="#ffffff" text-anchor="middle">÷</text>
+    <rect x="230" y="0" width="48" height="28" rx="8" fill="#8b5cf6" />
+    <text x="254" y="18" font-family="sans-serif" font-weight="bold" font-size="12" fill="#ffffff" text-anchor="middle">75关</text>
+  </g>
+</svg>
