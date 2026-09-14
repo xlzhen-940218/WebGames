@@ -41,6 +41,13 @@ const gameData = [
         description: '合并相同数字，挑战合成 2048，支持手机滑动操作。',
         link: 'games/ersilingba.html',
         date: '2026-09-07'
+    },
+    {
+        cover: 'images/dazhuankuai.svg',
+        title: '打砖块',
+        description: '拖动挡板反弹小球，击碎全部砖块过关，关卡越深球速越快。',
+        link: 'games/dazhuankuai.html',
+        date: '2026-09-14'
     }
 ];
 

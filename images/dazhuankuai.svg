@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="打砖块封面">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#172445"/>
+      <stop offset="1" stop-color="#0a1020"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8be9fd"/>
+      <stop offset="1" stop-color="#2e8fbf"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#fff6d6"/>
+      <stop offset="1" stop-color="#ffd166"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="300" rx="24" fill="url(#bg)"/>
+
+  <g fill="#ef476f">
+    <rect x="65" y="34" width="40" height="18" rx="5"/>
+    <rect x="111" y="34" width="40" height="18" rx="5"/>
+    <rect x="157" y="34" width="40" height="18" rx="5"/>
+    <rect x="203" y="34" width="40" height="18" rx="5"/>
+    <rect x="249" y="34" width="40" height="18" rx="5"/>
+    <rect x="295" y="34" width="40" height="18" rx="5"/>
+  </g>
+  <g fill="#f78c6b">
+    <rect x="65" y="58" width="40" height="18" rx="5"/>
+    <rect x="111" y="58" width="40" height="18" rx="5"/>
+    <rect x="157" y="58" width="40" height="18" rx="5"/>
+    <rect x="249" y="58" width="40" height="18" rx="5"/>
+    <rect x="295" y="58" width="40" height="18" rx="5"/>
+  </g>
+  <g fill="#ffd166">
+    <rect x="65" y="82" width="40" height="18" rx="5"/>
+    <rect x="111" y="82" width="40" height="18" rx="5"/>
+    <rect x="203" y="82" width="40" height="18" rx="5"/>
+    <rect x="249" y="82" width="40" height="18" rx="5"/>
+    <rect x="295" y="82" width="40" height="18" rx="5"/>
+  </g>
+  <g fill="#06d6a0">
+    <rect x="65" y="106" width="40" height="18" rx="5"/>
+    <rect x="111" y="106" width="40" height="18" rx="5"/>
+    <rect x="157" y="106" width="40" height="18" rx="5"/>
+    <rect x="203" y="106" width="40" height="18" rx="5"/>
+    <rect x="295" y="106" width="40" height="18" rx="5"/>
+  </g>
+
+  <path d="M238 212 L238 178 L214 150" fill="none" stroke="#ffd166" stroke-width="2.5"
+        stroke-linecap="round" stroke-dasharray="7 8" opacity="0.6"/>
+
+  <rect x="148" y="243" width="104" height="16" rx="8" fill="url(#pad)"/>
+  <circle cx="238" cy="212" r="11" fill="url(#ball)"/>
+</svg>

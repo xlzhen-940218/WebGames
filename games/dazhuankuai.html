@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>打砖块 - WebGames</title>
+    <style>
+        :root {
+            --bg: #0a1020;
+            --line: rgba(255, 255, 255, .09);
+            --text: #e8eefc;
+            --muted: #93a2c4;
+            --accent: #4cc9f0;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 16px 14px 32px;
+            background: radial-gradient(120% 70% at 50% 0%, #172445 0%, var(--bg) 62%);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-shell { width: min(100%, 480px); margin: 0 auto; }
+
+        .hud { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+        h1 { margin: 0; font-size: clamp(24px, 7vw, 32px); color: var(--accent); letter-spacing: .04em; }
+        .stats { display: flex; gap: 6px; }
+        .stat {
+            min-width: 64px; padding: 6px 10px; border-radius: 8px;
+            background: rgba(255, 255, 255, .05); border: 1px solid var(--line);
+            text-align: center; font-size: 11px; color: var(--muted);
+        }
+        .stat strong { display: block; font-size: 18px; color: var(--text); line-height: 1.25; }
+
+        .stage { position: relative; }
+        canvas {
+            display: block; width: 100%; height: auto; border-radius: 14px;
+            border: 1px solid var(--line); background: #0a1020;
+            touch-action: none; cursor: pointer;
+        }
+
+        .overlay {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; padding: 24px;
+            border-radius: 14px; background: rgba(8, 13, 26, .84); text-align: center;
+        }
+        .overlay[hidden] { display: none; }
+        .overlay h2 { margin: 0; font-size: clamp(22px, 6vw, 30px); color: var(--accent); }
+        .overlay p { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.5; }
+        .overlay button {
+            margin-top: 6px; border: 0; border-radius: 10px; padding: 12px 26px;
+            background: var(--accent); color: #06121f; font-size: 15px; font-weight: bold; cursor: pointer;
+        }
+        .overlay button:hover, .overlay button:focus-visible { background: #7fdcff; }
+
+        .actions { display: flex; gap: 8px; margin-top: 12px; }
+        .actions button {
+            flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px;
+            background: rgba(255, 255, 255, .06); color: var(--text);
+            font-size: 14px; font-weight: bold; cursor: pointer;
+        }
+        .actions button:hover:not(:disabled), .actions button:focus-visible:not(:disabled) { background: rgba(255, 255, 255, .12); }
+        .actions button:disabled { opacity: .38; cursor: not-allowed; }
+
+        .help { margin: 14px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+        .back { display: inline-block; margin-top: 14px; color: var(--accent); font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <main class="game-shell">
+        <header class="hud">
+            <h1>打砖块</h1>
+            <div class="stats" aria-label="游戏状态">
+                <div class="stat">分数<strong id="score">0</strong></div>
+                <div class="stat">最高<strong id="best">0</strong></div>
+                <div class="stat">生命<strong id="lives">3</strong></div>
+            </div>
+        </header>
+
+        <div class="stage">
+            <canvas id="stage" width="480" height="640" role="img" aria-label="打砖块游戏画面"></canvas>
+            <div id="overlay" class="overlay" hidden>
+                <h2 id="overlayTitle"></h2>
+                <p id="overlayText"></p>
+                <button id="overlayBtn" type="button"></button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="launchBtn" type="button">发球</button>
+            <button id="pauseBtn" type="button">暂停</button>
+            <button id="restartBtn" type="button">重新开始</button>
+        </div>
+
+        <p class="help">手机：在画面上拖动挡板，轻点画面或“发球”按钮发球；电脑：鼠标移动或 ← → 控制挡板，空格发球。</p>
+        <a class="back" href="../index.html">← 返回游戏首页</a>
+    </main>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ---- 逻辑坐标系：所有游戏常量都按 480x640 计算，渲染时再按 DPR 缩放 ----
+            const W = 480;
+            const H = 640;
+            const BALL_R = 8;
+            const BASE_SPEED = 330;
+            const MAX_SPEED = 620;
+            const PADDLE = { w: 96, h: 14, y: H - 52, speed: 640 };
+            const BRICK = { cols: 8, gap: 6, top: 34, h: 26, side: 14, maxRows: 7 };
+            const BRICK_W = (W - BRICK.side * 2 - BRICK.gap * (BRICK.cols - 1)) / BRICK.cols;
+            const ROW_COLORS = ['#ef476f', '#f78c6b', '#ffd166', '#06d6a0', '#4cc9f0', '#b388ff', '#f472b6'];
+            const BEST_KEY = 'webgames-breakout-best';
+
+            const canvas = document.getElementById('stage');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('score');
+            const bestEl = document.getElementById('best');
+            const livesEl = document.getElementById('lives');
+            const launchBtn = document.getElementById('launchBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const overlay = document.getElementById('overlay');
+            const overlayTitle = document.getElementById('overlayTitle');
+            const overlayText = document.getElementById('overlayText');
+            const overlayBtn = document.getElementById('overlayBtn');
+
+            // ---- 运行时状态 ----
+            let state = 'ready';       // ready | playing | paused | over
+            let stage = 1;
+            let score = 0;
+            let lives = 3;
+            let ballSpeed = BASE_SPEED;
+            let missStreak = 0;        // 连续几次挡板反弹都没有击碎砖块
+            let best = Number(localStorage.getItem(BEST_KEY)) || 0;
+            let paddleX = W / 2;
+            let bricks = [];
+            let bricksLeft = 0;
+            let particles = [];
+            let toastText = '';
+            let toastTime = 0;
+            let toastDuration = 1;
+            let lastTime = 0;
+
+            const ball = { x: W / 2, y: PADDLE.y - BALL_R - 1, vx: 0, vy: 0 };
+            const keys = new Set();
+            let drag = null;       // 触摸拖动状态
+            let pointerDown = null; // 用于区分“轻点”和“拖动”
+            let overlayAction = null;
+
+            const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+            // ---- 画布尺寸：Retina/高分屏下保持清晰，同时维持 480:640 逻辑比例 ----
+            function resizeCanvas() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+                const rect = canvas.getBoundingClientRect();
+                const w = Math.max(1, Math.round(rect.width * dpr));
+                const h = Math.max(1, Math.round(rect.height * dpr));
+                if (canvas.width !== w || canvas.height !== h) {
+                    canvas.width = w;
+                    canvas.height = h;
+                }
+                ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+            }
+
+            // ---- 覆盖层 ----
+            function showOverlay(title, text, buttonLabel, action) {
+                overlayTitle.textContent = title;
+                overlayText.textContent = text;
+                overlayBtn.textContent = buttonLabel || '';
+                overlayBtn.hidden = !buttonLabel;
+                overlayAction = action || null;
+                overlay.hidden = false;
+            }
+            function hideOverlay() {
+                overlay.hidden = true;
+                overlayAction = null;
+            }
+            overlayBtn.addEventListener('click', function () {
+                const action = overlayAction;
+                hideOverlay();
+                if (action) action();
+            });
+
+            // ---- 界面同步 ----
+            function syncUi() {
+                scoreEl.textContent = score;
+                bestEl.textContent = best;
+                livesEl.textContent = lives;
+                launchBtn.disabled = state !== 'ready';
+                pauseBtn.disabled = !(state === 'playing' || state === 'paused');
+                pauseBtn.textContent = state === 'paused' ? '继续' : '暂停';
+            }
+            function toast(text, duration) {
+                toastText = text;
+                toastDuration = duration;
+                toastTime = duration;
+            }
+
+            // ---- 关卡与球的复位 ----
+            function buildBricks() {
+                const rows = Math.min(3 + stage, BRICK.maxRows);
+                bricks = [];
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < BRICK.cols; c++) {
+                        bricks.push({
+                            x: BRICK.side + c * (BRICK_W + BRICK.gap),
+                            y: BRICK.top + r * (BRICK.h + BRICK.gap),
+                            w: BRICK_W,
+                            h: BRICK.h,
+                            color: ROW_COLORS[r % ROW_COLORS.length],
+                            value: (rows - r) * 10,
+                            alive: true
+                        });
+                    }
+                }
+                bricksLeft = bricks.length;
+            }
+            function stickBall() {
+                ball.x = paddleX;
+                ball.y = PADDLE.y - BALL_R - 1;
+                ball.vx = 0;
+                ball.vy = 0;
+            }
+            function resetGame() {
+                hideOverlay();
+                stage = 1;
+                score = 0;
+                lives = 3;
+                ballSpeed = BASE_SPEED;
+                missStreak = 0;
+                paddleX = W / 2;
+                particles = [];
+                toastTime = 0;
+                buildBricks();
+                stickBall();
+                state = 'ready';
+                syncUi();
+            }
+
+            // ---- 发球 / 暂停 / 结束 ----
+            function launch() {
+                if (state !== 'ready') return;
+                const angle = -Math.PI / 2 + (Math.random() * 2 - 1) * 0.42;
+                ball.vx = Math.cos(angle) * ballSpeed;
+                ball.vy = Math.sin(angle) * ballSpeed;
+                normalizeBall();
+                state = 'playing';
+                syncUi();
+            }
+            function togglePause() {
+                if (state === 'playing') {
+                    state = 'paused';
+                    showOverlay('已暂停', '休息一下，准备好了就继续。', '继续游戏', function () {
+                        state = 'playing';
+                        lastTime = 0;
+                        syncUi();
+                    });
+                    syncUi();
+                } else if (state === 'paused') {
+                    hideOverlay();
+                    state = 'playing';
+                    lastTime = 0;
+                    syncUi();
+                }
+            }
+            function gameOver() {
+                state = 'over';
+                syncUi();
+                showOverlay('游戏结束', '本局得分 ' + score + ' 分，止步第 ' + stage + ' 关。', '再来一局', resetGame);
+            }
+            function clearStage() {
+                stage += 1;
+                ballSpeed = Math.min(BASE_SPEED + (stage - 1) * 24, MAX_SPEED);
+                missStreak = 0;
+                buildBricks();
+                stickBall();
+                state = 'ready';
+                toast('第 ' + stage + ' 关', 1.3);
+                syncUi();
+            }
+            function loseLife() {
+                lives -= 1;
+                if (lives <= 0) {
+                    lives = 0;
+                    gameOver();
+                    return;
+                }
+                missStreak = 0;
+                stickBall();
+                state = 'ready';
+                toast('还剩 ' + lives + ' 条命', 1.1);
+                syncUi();
+            }
+
+            // ---- 物理 ----
+            function normalizeBall() {
+                const speed = Math.hypot(ball.vx, ball.vy);
+                if (!speed) return;
+                ball.vx = ball.vx / speed * ballSpeed;
+                ball.vy = ball.vy / speed * ballSpeed;
+                // 避免球贴着水平方向来回弹，导致局面卡死
+                const minVy = ballSpeed * 0.38;
+                if (Math.abs(ball.vy) < minVy) {
+                    ball.vy = (ball.vy < 0 ? -1 : 1) * minVy;
+                    const rest = Math.sqrt(Math.max(ballSpeed * ballSpeed - ball.vy * ball.vy, 0));
+                    ball.vx = (ball.vx < 0 ? -1 : 1) * rest;
+                }
+            }
+            function spawnParticles(x, y, color) {
+                for (let i = 0; i < 8; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const s = 60 + Math.random() * 160;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+                        life: 0.45, max: 0.45,
+                        r: 2 + Math.random() * 2,
+                        color: color
+                    });
+                }
+            }
+            function hitBrick(b) {
+                const nx = clamp(ball.x, b.x, b.x + b.w);
+                const ny = clamp(ball.y, b.y, b.y + b.h);
+                const dx = ball.x - nx;
+                const dy = ball.y - ny;
+                if (dx * dx + dy * dy > BALL_R * BALL_R) return false;
+
+                b.alive = false;
+                bricksLeft -= 1;
+                missStreak = 0; // 击中了砖块，扰动幅度回到最小
+                score += b.value;
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem(BEST_KEY, String(best));
+                }
+                spawnParticles(b.x + b.w / 2, b.y + b.h / 2, b.color);
+                syncUi();
+
+                // 按最小穿透轴决定反弹方向，避免球卡在砖块缝隙里
+                const cx = b.x + b.w / 2;
+                const cy = b.y + b.h / 2;
+                const overlapX = b.w / 2 + BALL_R - Math.abs(ball.x - cx);
+                const overlapY = b.h / 2 + BALL_R - Math.abs(ball.y - cy);
+                if (overlapX < overlapY) {
+                    ball.vx = ball.x < cx ? -Math.abs(ball.vx) : Math.abs(ball.vx);
+                    ball.x += ball.x < cx ? -overlapX : overlapX;
+                } else {
+                    ball.vy = ball.y < cy ? -Math.abs(ball.vy) : Math.abs(ball.vy);
+                    ball.y += ball.y < cy ? -overlapY : overlapY;
+                }
+                normalizeBall();
+
+                if (bricksLeft <= 0) clearStage();
+                return true;
+            }
+            function stepBall(dt) {
+                ball.x += ball.vx * dt;
+                ball.y += ball.vy * dt;
+
+                if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
+                else if (ball.x + BALL_R > W) { ball.x = W - BALL_R; ball.vx = -Math.abs(ball.vx); }
+                if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
+
+                // 挡板：反弹角度取决于击中位置，越靠边角度越斜
+                if (ball.vy > 0 &&
+                    ball.y + BALL_R >= PADDLE.y &&
+                    ball.y - BALL_R <= PADDLE.y + PADDLE.h &&
+                    ball.x >= paddleX - PADDLE.w / 2 - BALL_R &&
+                    ball.x <= paddleX + PADDLE.w / 2 + BALL_R) {
+                    const rel = clamp((ball.x - paddleX) / (PADDLE.w / 2), -1, 1);
+                    // 正常情况下反弹角完全由击球点决定，玩家可以用挡板主动瞄准。
+                    // 但若角度永远只由 rel 决定，球会陷入固定周期轨道：在砖块缝隙之间
+                    // 无限往返，实测能连续几十秒甚至几分钟打不到最后残存的几块砖。
+                    // 因此每次反弹都叠加一个随机扰动，幅度随「连续几次没打到砖块」增长：
+                    // 正常游玩时不足 4°、玩家察觉不到，一旦卡住就扩大到 ±50° 左右自动脱困。
+                    // 只要打中一块砖块 missStreak 立刻归零，方向重新回到玩家可控。
+                    const jitter = Math.min(0.06 + missStreak * 0.18, 0.9);
+                    // 夹住角度，否则贴边击球叠加扰动后会越过水平线，球会朝下反弹并在挡板上抖动
+                    const limit = Math.PI / 2.2;
+                    const angle = clamp(rel * (Math.PI / 3) + (Math.random() * 2 - 1) * jitter, -limit, limit);
+                    ball.vx = Math.sin(angle) * ballSpeed;
+                    ball.vy = -Math.cos(angle) * ballSpeed;
+                    ball.y = PADDLE.y - BALL_R - 0.5;
+                    missStreak += 1;
+                    // 随机方向可能接近水平，这里把速度拉回竖直范围内
+                    normalizeBall();
+                    return;
+                }
+
+                for (let i = 0; i < bricks.length; i++) {
+                    const b = bricks[i];
+                    if (b.alive && hitBrick(b)) return;
+                }
+
+                if (ball.y - BALL_R > H) loseLife();
+            }
+
+            // ---- 每帧更新 ----
+            function update(dt) {
+                if (toastTime > 0) toastTime = Math.max(0, toastTime - dt);
+
+                particles = particles.filter(function (p) {
+                    p.life -= dt;
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.vy += 420 * dt;
+                    return p.life > 0;
+                });
+
+                const direction = (keys.has('right') ? 1 : 0) - (keys.has('left') ? 1 : 0);
+                if (direction && state !== 'over') {
+                    paddleX = clamp(paddleX + direction * PADDLE.speed * dt, PADDLE.w / 2, W - PADDLE.w / 2);
+                    if (state === 'ready') stickBall();
+                }
+
+                if (state !== 'playing') return;
+
+                // 子步进：球速较高时避免一帧跨过砖块造成穿透
+                const distance = Math.hypot(ball.vx, ball.vy) * dt;
+                const steps = Math.max(1, Math.ceil(distance / 4));
+                const sub = dt / steps;
+                for (let i = 0; i < steps; i++) {
+                    stepBall(sub);
+                    if (state !== 'playing') break;
+                }
+            }
+
+            // ---- 绘制 ----
+            function roundRect(x, y, w, h, r) {
+                const rr = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + rr, y);
+                ctx.arcTo(x + w, y, x + w, y + h, rr);
+                ctx.arcTo(x + w, y + h, x, y + h, rr);
+                ctx.arcTo(x, y + h, x, y, rr);
+                ctx.arcTo(x, y, x + w, y, rr);
+                ctx.closePath();
+            }
+            function drawBrick(b) {
+                roundRect(b.x, b.y, b.w, b.h, 6);
+                ctx.fillStyle = b.color;
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255, 255, 255, .22)';
+                roundRect(b.x + 3, b.y + 3, b.w - 6, 5, 2.5);
+                ctx.fill();
+            }
+            function drawPaddle() {
+                const x = paddleX - PADDLE.w / 2;
+                ctx.save();
+                ctx.shadowColor = 'rgba(76, 201, 240, .75)';
+                ctx.shadowBlur = 18;
+                const gradient = ctx.createLinearGradient(0, PADDLE.y, 0, PADDLE.y + PADDLE.h);
+                gradient.addColorStop(0, '#8be9fd');
+                gradient.addColorStop(1, '#2e8fbf');
+                roundRect(x, PADDLE.y, PADDLE.w, PADDLE.h, PADDLE.h / 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.restore();
+            }
+            function drawBall() {
+                ctx.save();
+                ctx.shadowColor = 'rgba(255, 209, 102, .85)';
+                ctx.shadowBlur = 18;
+                const gradient = ctx.createRadialGradient(ball.x - 3, ball.y - 3, 1, ball.x, ball.y, BALL_R);
+                gradient.addColorStop(0, '#fff6d6');
+                gradient.addColorStop(1, '#ffd166');
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.restore();
+            }
+            function draw() {
+                const background = ctx.createLinearGradient(0, 0, 0, H);
+                background.addColorStop(0, '#131c36');
+                background.addColorStop(1, '#0a1020');
+                ctx.fillStyle = background;
+                ctx.fillRect(0, 0, W, H);
+
+                for (let i = 0; i < bricks.length; i++) {
+                    if (bricks[i].alive) drawBrick(bricks[i]);
+                }
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    ctx.globalAlpha = Math.max(p.life / p.max, 0);
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+
+                drawPaddle();
+                drawBall();
+
+                if (state === 'ready') {
+                    ctx.save();
+                    ctx.globalAlpha = 0.45 + Math.sin(performance.now() / 350) * 0.25;
+                    ctx.fillStyle = '#ffd166';
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('轻点画面或按“发球”开始', W / 2, PADDLE.y - 44);
+                    ctx.restore();
+                }
+
+                if (toastTime > 0) {
+                    const alpha = Math.min(1, toastTime / (toastDuration * 0.45));
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = 'rgba(8, 13, 26, .72)';
+                    roundRect(W / 2 - 104, H / 2 - 34, 208, 68, 12);
+                    ctx.fill();
+                    ctx.fillStyle = '#4cc9f0';
+                    ctx.font = 'bold 28px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(toastText, W / 2, H / 2);
+                    ctx.restore();
+                }
+            }
+
+            // ---- 主循环 ----
+            function frame(now) {
+                if (!lastTime) lastTime = now;
+                const dt = Math.min((now - lastTime) / 1000, 0.033);
+                lastTime = now;
+                update(dt);
+                draw();
+                requestAnimationFrame(frame);
+            }
+
+            // ---- 输入：指针（鼠标 + 触摸统一处理）----
+            function pointerX(clientX) {
+                const rect = canvas.getBoundingClientRect();
+                return (clientX - rect.left) / rect.width * W;
+            }
+            function pointerY(clientY) {
+                const rect = canvas.getBoundingClientRect();
+                return (clientY - rect.top) / rect.height * H;
+            }
+            function movePaddleTo(x) {
+                paddleX = clamp(x, PADDLE.w / 2, W - PADDLE.w / 2);
+                if (state === 'ready') stickBall();
+            }
+
+            canvas.addEventListener('pointerdown', function (event) {
+                if (state === 'over' || state === 'paused') return;
+                const x = pointerX(event.clientX);
+                pointerDown = { x: x, y: pointerY(event.clientY), id: event.pointerId };
+                if (event.pointerType !== 'mouse') {
+                    drag = { id: event.pointerId, startX: x, paddleStart: paddleX };
+                    try { canvas.setPointerCapture(event.pointerId); } catch (e) { /* 忽略 */ }
+                }
+            });
+            canvas.addEventListener('pointermove', function (event) {
+                if (state === 'over') return;
+                const x = pointerX(event.clientX);
+                if (event.pointerType === 'mouse') {
+                    // 鼠标：挡板直接跟随指针
+                    movePaddleTo(x);
+                } else if (drag && drag.id === event.pointerId) {
+                    // 触摸：相对拖动，手指不必压在挡板上
+                    movePaddleTo(drag.paddleStart + (x - drag.startX));
+                }
+            });
+            function endPointer(event) {
+                if (drag && drag.id === event.pointerId) drag = null;
+                if (pointerDown && pointerDown.id === event.pointerId) {
+                    const moved = Math.hypot(pointerX(event.clientX) - pointerDown.x,
+                                             pointerY(event.clientY) - pointerDown.y);
+                    pointerDown = null;
+                    if (moved < 10 && state === 'ready') launch();
+                }
+            }
+            canvas.addEventListener('pointerup', endPointer);
+            canvas.addEventListener('pointercancel', function (event) {
+                if (drag && drag.id === event.pointerId) drag = null;
+                if (pointerDown && pointerDown.id === event.pointerId) pointerDown = null;
+            });
+
+            // ---- 输入：键盘 ----
+            document.addEventListener('keydown', function (event) {
+                const key = event.key;
+                if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
+                    keys.add('left');
+                    event.preventDefault();
+                } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
+                    keys.add('right');
+                    event.preventDefault();
+                } else if (key === ' ' || key === 'Enter') {
+                    if (event.target instanceof HTMLButtonElement) return;
+                    event.preventDefault();
+                    if (state === 'ready') launch();
+                    else if (state === 'playing' || state === 'paused') togglePause();
+                } else if (key === 'p' || key === 'P') {
+                    if (state === 'playing' || state === 'paused') {
+                        event.preventDefault();
+                        togglePause();
+                    }
+                }
+            });
+            document.addEventListener('keyup', function (event) {
+                const key = event.key;
+                if (key === 'ArrowLeft' || key === 'a' || key === 'A') keys.delete('left');
+                else if (key === 'ArrowRight' || key === 'd' || key === 'D') keys.delete('right');
+            });
+
+            // ---- 按钮 ----
+            launchBtn.addEventListener('click', launch);
+            pauseBtn.addEventListener('click', togglePause);
+            restartBtn.addEventListener('click', resetGame);
+
+            // ---- 启动 ----
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('orientationchange', resizeCanvas);
+            resetGame();
+            requestAnimationFrame(frame);
+        })();
+    </script>
+</body>
+</html>
