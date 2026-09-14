@@ -25,7 +25,7 @@
 	- 或在 VS Code 中安装并启用 `Live Server` 插件，点击 `Go Live` 即可预览。
 
 **在线演示**
-- GitHub Pages（托管）：https://webgames.codetools.fun/
+- GitHub Pages（托管）：https://game.xionglele.cn/
 
 **已包含的游戏（简述）**
 - 推箱子（`games/tuixiangzi.html`）：经典推箱子玩法，使用键盘控制角色移动并推箱子到目标位置。
