@@ -1875,6 +1875,16 @@
                 const set = new Set();
                 set.add(correct);
 
+                // 强制添加一个同尾数干扰项（相差10、20等），确保用户不能只看尾数
+                const tailDiffs = [10, -10, 20, -20, 30, -30];
+                for (let diff of tailDiffs) {
+                    const candidate = correct + diff;
+                    if (candidate >= 0 && !set.has(candidate)) {
+                        set.add(candidate);
+                        break;
+                    }
+                }
+
                 const potentialDiffs = [1, -1, 2, -2, 10, -10, 5, -5, 3, -3, 20, -20];
                 
                 // 1. 尝试邻近值
